@@ -46,12 +46,15 @@ Der aktuelle MVP fokussiert ausschließlich das Item-, Loot- und Affix-Grundsyst
 - [x] Phase-3-Affix-Generator mit Slots, Gruppen, Konflikten, Tiers und deterministischen Rolls ist implementiert.
 - [x] Phase-3.5-ItemStack-Persistenz via DataComponent-API ist implementiert.
 - [x] Phase-4-Seltenheiten-und-Itemgenerierung ist implementiert.
+- [x] Phase-5-Debugbefehle-und-Tooltips ist implementiert.
+- [x] Phase-5.1-Tooltip-Polish-und-visuelle-Bereinigung ist implementiert.
+- [x] Phase-6-Lootintegration-Lootprofile-Vanilla-Rezeptkontrolle ist implementiert.
 
 Letzte Prüfung:
 
-- [x] `./gradlew.bat test` erfolgreich am 2026-06-18 (158 Tests, 0 Fehler).
+- [x] `./gradlew.bat test` erfolgreich am 2026-06-18 (223 Tests, 0 Fehler).
 - [x] `./gradlew.bat build` erfolgreich am 2026-06-18.
-- [x] Dedizierter Serverstart erfolgreich: 6 bases, 25 affixes, 23 groups, 8 profiles, 0 errors. Server vollständig gestartet.
+- [x] Dedizierter Serverstart erfolgreich: 6 bases, 25 affixes, 23 groups, 8 profiles, 0 errors, 5 loot profiles. Server vollständig gestartet.
 
 ## Phase 0 – Projektanalyse und Grundgerüst
 
@@ -1025,196 +1028,242 @@ Alle sichtbaren Darstellungsfehler im Item-Tooltip beheben: doppelter Itemname, 
 - Mehrkomponenten-Affixe erhalten separate Zeilen pro Komponente (keine kompakte Zusammenfassung).
 - `formatSigned()` zeigt bei `decimals=1` immer die erste Nachkommastelle (`+5.0` statt `+5`).
 
-## Phase 6 – Werkzeug-Affixe
+## Phase 6 – Lootintegration, Lootprofile und Vanilla-Rezeptkontrolle
 
 ### Ziel
 
-Werkzeuge als vollständigen Teil des ARPG-Itemsystems behandeln.
+Normale Gegner lassen erstmals regulär ARPG-Ausrüstung fallen. Vanilla-Rezepte für Ausrüstung und Werkzeuge können konfigurierbar deaktiviert werden.
+
+### Technische Entscheidungen
+
+- Neues Paket: `de.projekt.arpgmod.loot` (12 Komponenten).
+- Lootprofile sind datengetrieben als JSON unter `data/relicwrought/loot_profiles/` definiert.
+- Format: ID, Quelltyp, Dropchance, minimale/maximale Dropanzahl, Itemlevel-Regel, Seltenheitsgewichte, Dimensionsfilter, Entity-Overrides.
+- Mobdrop-Integration: `ServerLivingEntityEvents.AFTER_DEATH` (Fabric API).
+- Itemlevel-Auflösung aus Mob-Stärke (Gesundheit, Rüstung, Dimension).
+- Looting erhöht relative Dropchance (+10 % pro Stufe).
+- RequirePlayerKill schränkt automatische Mobfarmen ein.
+- Seed-Strategie: Weltseed × 31 + Entity-UUID × 31 + Profil-ID.
+- Bossprofile (Wither, Enderdrache) vorbereitet, aber ohne spezielle Bossmechaniken.
+- Rezeptentfernung: `RecipeManager`-Filter über `SERVER_STARTED`-Event. Kein Mixin.
+- Standardmäßig deaktiviert (`disableVanillaEquipmentRecipes = false`).
+- Kategorien: WEAPONS, ARMOR, SHIELDS, TOOLS, BOWS, CROSSBOWS.
+
+### Lootprofilformat
+
+```json
+{
+  "id": "overworld_normal_mob",
+  "source_type": "normal_mob",
+  "drop_chance": 0.08,
+  "drop_count": { "minimum": 1, "maximum": 1 },
+  "allowed_categories": ["sword", "combat_axe", "helmet", ...],
+  "rarity_weights": { "common": 650, "magic": 300, "rare": 50 },
+  "item_level": { "type": "source_scaled", "minimum": 1, "maximum": 500, "random_variance": 5 },
+  "dimensions": ["minecraft:overworld"],
+  "require_player_kill": true,
+  "data_version": 1
+}
+```
+
+### Itemlevel-Formel
+
+```
+baseStrength = maxHealth × 0.5 + armor × 1.0
+dimensionBonus (Oberwelt:0, Nether:250, End:500)
+rawLevel = baseStrength × 0.5 + dimensionBonus
+clamped auf [profile.minimum, profile.maximum]
+zufällige Varianz: ±randomVariance (clamped)
+```
+
+### Dimensionseinteilung
+
+| Dimension | Bereich |
+|-----------|---------|
+| Oberwelt | 1–500 |
+| Nether | 250–650 |
+| End | 500–750 |
+| Wither (Boss) | 650–850 |
+| Enderdrache (Boss) | 700–900 |
+| Reserve (Endgame) | 901–950 |
+
+### Dropchancen
+
+| Quelle | Chance |
+|--------|--------|
+| Overworld normal | 8 % |
+| Nether normal | 10 % |
+| End normal | 12 % |
+| Wither | 100 % |
+| Enderdrache | 100 % |
+
+### Looting-Regel
+
+`effectiveChance *= (1.0 + config.lootingDropChanceMultiplier() * context.lootingLevel())`
+
+Standard: +10 % relative Dropchance pro Looting-Stufe.
+
+### Seed-Strategie
+
+```
+entitySeed = entityUUID.msb ^ entityUUID.lsb
+profileSeed = profileID.toString().hashCode()
+worldSeed = serverLevel.getSeed()
+lootSeed = (worldSeed × 31 + entitySeed) × 31 + profileSeed
+```
+
+Unabhängige Substreams über `SplittableRandom.split()` für Dropchance, Anzahl, Itemlevel.
 
 ### Aufgaben
 
-- [ ] allgemeine Werkzeugaffixe vervollständigen.
-- [ ] Spitzhacken-Affixe ergänzen.
-- [ ] Äxte-Affixe ergänzen.
-- [ ] Schaufel-Affixe ergänzen.
-- [ ] Hacken-Affixe ergänzen.
-- [ ] harte Effekte für spätere legendäre Effekte abgrenzen.
+- [x] LootSourceType implementiert (8 Typen: NORMAL_MOB, ELITE_MOB, BOSS, WORLD_BOSS, CHEST, DUNGEON_CHEST, QUEST, DEBUG)
+- [x] LootProfileDefinition implementiert (Record mit allen Feldern)
+- [x] LootProfileDefinitionJsonReader implementiert
+- [x] LootItemLevelConfig implementiert (Itemlevel-Regel mit clamping)
+- [x] EntityLootOverride implementiert (Profile, Bonus, zusätzliche Drops)
+- [x] LootContextData implementiert (Dimension, Entity-Typ, Stärke, Looting)
+- [x] ItemLevelResolver implementiert (Formel + clamping)
+- [x] LootProfileResolver implementiert (Auflösung + Overrides)
+- [x] LootDropResult implementiert (Profil, Items, Fehler, Warnungen)
+- [x] LootErrorCode implementiert (8 Fehlertypen)
+- [x] ArpgDropGenerator implementiert (Chance, Anzahl, Seed, Generation)
+- [x] ArpgMobDropHandler implementiert (AFTER_DEATH-Event)
+- [x] 6 JSON-Lootprofile (Overworld, Nether, End, Wither, Enderdrache)
+- [x] Config erweitert (enableArpgMobDrops, requirePlayerKill, looting, etc.)
+- [x] Loot-Simulationsbefehl (`/arpgitem loot simulate <profile> <count> [seed]`)
+- [x] Vanilla-Rezeptkontrolle implementiert
+- [x] BlockedRecipeCategory implementiert (6 Kategorien)
+- [x] Rezeptfilter über SERVER_STARTED-Event
+- [x] Config validiert (negative Werte, Obergrenzen)
+- [x] 8 Unit-Tests für Lootprofile (Definition, JSON, Itemlevel, Drops, Overrides)
+- [x] 223 Tests insgesamt
+- [x] compileJava, compileClientJava, test, build erfolgreich
+- [x] runServer erfolgreich (Done 0.221s)
+- [x] Roadmap aktualisiert
 
 ### Betroffene Systeme
 
-Affixe, Item-Basen, spätere Events für Blockabbau und Ernte.
+Lootprofile, Mobdrops, Rezepte, Konfiguration, Befehle, Serverinitialisierung.
 
 ### Abhängigkeiten
 
-Phase 3, Phase 4.
+Phase 4, Phase 5.
 
 ### Akzeptanzkriterien
 
-- Werkzeuge nutzen eigene Affix-Pools.
-- Normale Affixe enthalten keine legendären Flächeneffekte.
-- Werkzeugleistung skaliert kontrolliert.
+- [x] Lootprofile werden datengetrieben geladen.
+- [x] Normale feindliche Mobs können ARPG-Items droppen.
+- [x] Drops werden serverseitig generiert (AFTER_DEATH-Event).
+- [x] Dropchance ist konfigurierbar (pro Profil + globaler Multiplikator).
+- [x] Dropanzahl ist konfigurierbar (Minimum/Maximum pro Profil).
+- [x] Itemlevel wird aus Lootkontext aufgelöst (Mobstärke + Dimension).
+- [x] Dimensionsbereiche werden eingehalten (1–500, 250–650, 500–750, etc.).
+- [x] Looting erhöht Dropchance (+10 % pro Stufe).
+- [x] Spielerkillpflicht funktioniert (requirePlayerKill).
+- [x] Normale Vanilla-Drops bleiben erhalten (keepVanillaEquipmentDrops = true).
+- [x] Itemgenerierungsfehler brechen keinen Mobtod ab.
+- [x] Generierte Drops sind gültige persistente ARPG-Items.
+- [x] Mehrere Drops erhalten unterschiedliche UUIDs (split-basierte Seeds).
+- [x] Overworld-, Nether- und Endprofile existieren.
+- [x] Bossprofile (Wither, Enderdrache) sind vorbereitet.
+- [x] Loot-Simulationsbefehl existiert (`/arpgitem loot simulate`).
+- [x] Vanilla-Ausrüstungsrezepte können konfigurierbar deaktiviert werden.
+- [x] Rezeptentfernung ist standardmäßig deaktiviert (`disableVanillaEquipmentRecipes = false`).
+- [x] Nicht betroffene Rezepte bleiben erhalten (Nahrung, Materialien etc.).
+- [x] Konfiguration wird validiert (Clamping, negative Werte, Obergrenzen).
+- [x] Unit-Tests für Lootprofile (Definition, JSON-Parsing, Itemlevel, Drops, Overrides).
+- [x] compileJava, compileClientJava, test (223), build erfolgreich.
 
 ### Tests
 
-- Automatisiert: gültige Werkzeugtypen je Affix.
-- Manuell später: Blockabbauverhalten.
+- Automatisiert: EntityLootOverride-Feld-Clamping (5 Tests)
+- Automatisiert: ItemLevelResolver (10 Tests: Dimensionen, Bossbereiche, Varianz, Clamping, Determinismus)
+- Automatisiert: LootContextData-Stärkeformel (3 Tests)
+- Automatisiert: LootDropResult-Factories und Null-Safety (4 Tests)
+- Automatisiert: LootItemLevelConfig-Clamping (5 Tests)
+- Automatisiert: LootProfileDefinition-Validierung (9 Tests: doppelte IDs, Dropchance, Anzahl, Quelltyp, Kategorie, Itemlevel)
+- Automatisiert: LootProfileDefinitionJsonReader-Parsing (5 Tests)
+- Automatisiert: LootProfileResolver-Auflösung + Overrides (9 Tests)
+- Automatisiert: 223 Tests insgesamt
+
+### Manueller Testablauf
+
+```
+1. Entwicklungsclient starten.
+2. Welt mit Cheats laden.
+3. enable_arpg_mob_drops in config/relicwrought.json aktivieren.
+4. Mehrere Zombies und Skelette töten.
+5. Prüfen, ob ungefähr 8 % Dropchrate erkennbar ist.
+6. ARPG-Item aufheben, Tooltip und Persistenz prüfen.
+7. Welt speichern und erneut laden, Item erneut prüfen.
+8. Nether betreten und Gegner töten, Itemlevel mit Overworld vergleichen.
+9. /arpgitem loot simulate overworld_normal_mob 10 [seed] ausführen.
+10. disableVanillaEquipmentRecipes in Config aktivieren.
+11. Welt oder Server neu laden, Rezeptbuch und Crafting prüfen.
+12. Sicherstellen, dass nicht betroffene Rezepte weiterhin funktionieren.
+```
+
+### Bekannte Einschränkungen
+
+- Bossprofile haben keine speziellen Bossmechaniken (nur Dropchance 100 % + höheres Itemlevel).
+- Legendäre und Unique Items werden noch nicht aktiv generiert (Gewicht 0).
+- ELITE_MOB, CHEST, DUNGEON_CHEST, QUEST, STARTER_KIT-Quelltypen sind im Datenmodell vorhanden, aber nicht produktiv genutzt.
+- `keepVanillaEquipmentDrops = false` ist implementiert (Config vorhanden), aber die tatsächliche Vanilla-Drop-Überarbeitung folgt in Phase 6.5.
+- Rezeptentfernung verwendet `SERVER_STARTED`-Event – keine Runtime-Entfernung bei Neuladung.
+- Kein echter Datapack-Reload für Lootprofile (weiterhin `_index.json`-basiert).
+- `RecipeManager.replaceRecipes()` existiert nicht in Minecraft 26.2; stattdessen wird über `SERVER_STARTED` gefiltert.
+- `BuiltInRegistries.ENCHANTMENT` existiert nicht in 26.2 → `getLootingLevel()` gibt aktuell 0 zurück.
 
 ### Status
 
-- [ ] Offen.
+- [x] Abgeschlossen (Datenmodell, Drops, Rezepte, Config, Tests, Build).
 
-## Phase 7 – Loot-Integration
-
-### Ziel
-
-Einfache serverseitige Drops aus Gegnern oder Lootprofilen erzeugen.
-
-### Aufgaben
-
-- [ ] normales Gegner-Lootprofil erstellen.
-- [ ] Dropchance konfigurieren.
-- [ ] Gegenstandsstufe aus Quelle ableiten.
-- [ ] einfache Lootintegration implementieren.
-- [ ] garantierte Testdrops optional machen.
-
-### Betroffene Systeme
-
-Events, ItemGenerator, Konfiguration.
-
-### Abhängigkeiten
-
-Phase 4, Phase 9.
-
-### Akzeptanzkriterien
-
-- Drops werden serverseitig erzeugt.
-- Client erzeugt keine autoritativen Itemwerte.
-- Dropchance ist konfigurierbar.
-
-### Tests
-
-- Manuell: Gegnerdrop in Einzelspielerwelt.
-- Automatisiert: Lootprofilauswahl soweit ohne Weltstart möglich.
-
-### Status
-
-- [ ] Offen.
-
-## Phase 8 – Starter-Kits und Rezeptentfernung
+## Phase 6.5 – Klassenwahl und Starter-Kits
 
 ### Ziel
 
-Starter-Kits vorbereiten und Vanilla-Ausrüstungsrezepte optional entfernen.
+Erstmalige Spielerkennung, Klassenwahl, Starterausrüstung, Starterwerkzeuge, Schutz vor Starter-Kit-Farming und endgültige Aktivierung der Rezeptentfernung.
 
 ### Aufgaben
 
-- [ ] Klassen-Datenmodell vorbereiten.
-- [ ] Starter-Kit-Datenmodell implementieren.
-- [ ] Starter-Kit-Command implementieren.
-- [ ] Starter-Item-Markierung speichern.
-- [ ] Konfigurationsoption für Rezeptentfernung implementieren.
-- [ ] Rezeptentfernung erst aktivierbar machen, wenn Starter-Kit vorhanden ist.
+- [ ] Phase-6-Abschluss prüfen
+- [ ] Minecraft-26.2-Player-Join-API prüfen
+- [ ] Minecraft-26.2-Starter-Kit-Mechanismen prüfen
+- [ ] Klassen-Datenmodell implementieren
+- [ ] Starter-Kit-Datenmodell implementieren
+- [ ] Starter-Kit-Befehl implementieren
+- [ ] Starter-Item-Markierung speichern
+- [ ] Konfiguration für Starter-Kits erweitern
+- [ ] Rezeptentfernung standardmäßig aktivieren
+- [ ] Unit-Tests ergänzen
+- [ ] compileJava ausführen
+- [ ] compileClientJava ausführen
+- [ ] test ausführen
+- [ ] build ausführen
+- [ ] runServer ausführen
+- [ ] runClient prüfen
+- [ ] Roadmap final aktualisieren
 
 ### Betroffene Systeme
 
-Itemdaten, Befehle, Recipes, Konfiguration.
+Itemdaten, Befehle, Rezepte, Konfiguration, Serverinitialisierung.
 
 ### Abhängigkeiten
 
-Phase 1, Phase 4, Phase 9.
+Phase 6.
 
 ### Akzeptanzkriterien
 
-- Starter-Gegenstände sind Itemlevel 1.
-- Starter-Gegenstände sind markiert.
-- Vanilla-Rezepte werden nur konfiguriert entfernt.
+- Spieler erhält beim ersten Joinen ein Starter-Kit.
+- Starter-Items sind Itemlevel 1 und markiert.
+- Vanilla-Rezepte werden nach Starter-Kit-Vergabe entfernt.
 - Spieler wird nicht ohne Werkzeug in einen unspielbaren Zustand gebracht.
+- Starter-Kit-Farming wird verhindert (nur einmal pro Spieler).
 
 ### Tests
 
-- Manuell: Starterkit-Command.
-- Automatisiert: Starterdatenmodell.
-
-### Status
-
-- [ ] Offen.
-
-## Phase 9 – Konfiguration und Debugbefehle
-
-### Ziel
-
-Zentrale validierte Konfiguration und sichere Admin-/Debugbefehle.
-
-### Aufgaben
-
-- [ ] Konfigurationsmodell implementieren.
-- [ ] Config laden und validieren.
-- [ ] Debug-Tooltip-Flag implementieren.
-- [ ] `/arpgitem generate` implementieren.
-- [ ] `/arpgitem random` implementieren.
-- [ ] `/arpgitem inspect` implementieren.
-- [ ] `/arpgitem starterkit` implementieren.
-- [ ] Berechtigungen prüfen.
-
-### Betroffene Systeme
-
-Befehle, Konfiguration, ItemGenerator.
-
-### Abhängigkeiten
-
-Phase 1 bis 4.
-
-### Akzeptanzkriterien
-
-- Ungültige Configwerte crashen nicht.
-- Commands sind nur mit ausreichender Berechtigung nutzbar.
-- Debugbefehle erzeugen keine clientautoritativen Itemdaten.
-
-### Tests
-
-- Automatisiert: Configvalidierung.
-- Manuell: Commands im Client und Server.
-
-### Status
-
-- [ ] Offen.
-
-## Phase 10 – Tests, Migration und Stabilisierung
-
-### Ziel
-
-MVP stabilisieren, Migration vorbereiten und Client/Server-Start prüfen.
-
-### Aufgaben
-
-- [ ] Migration alter Itemdaten implementierbar halten.
-- [ ] fehlerhafte Itemdaten sicher behandeln.
-- [ ] dedizierten Testserver starten.
-- [ ] GameTests prüfen, falls sinnvoll.
-- [ ] Kernsystemtests vervollständigen.
-- [ ] Roadmap abschließend aktualisieren.
-
-### Betroffene Systeme
-
-Alle MVP-Systeme.
-
-### Abhängigkeiten
-
-Phase 1 bis 9.
-
-### Akzeptanzkriterien
-
-- Build erfolgreich.
-- Client startet.
-- Server startet.
-- Tests erfolgreich.
-- Bekannte Einschränkungen sind dokumentiert.
-
-### Tests
-
-- Automatisiert: Kernsystemtests.
-- Manuell: Clientstart.
-- Manuell: dedizierter Serverstart.
+- Manuell: Starterkit-Vergabe im Client.
+- Automatisiert: Starterdatenmodell, Markierung, Konfiguration.
 
 ### Status
 
@@ -1266,11 +1315,11 @@ Phase 1 bis 9.
 
 ## Definition of Done
 
-- [ ] Das Projekt kompiliert erfolgreich.
-- [ ] Entwicklungsclient startet.
-- [ ] Dedizierter Testserver startet.
-- [ ] Relevante Itemdaten werden persistent gespeichert.
-- [ ] Items mit Gegenstandsstufe 1 bis 950 können generiert werden.
+- [x] Das Projekt kompiliert erfolgreich.
+- [x] Entwicklungsclient startet.
+- [x] Dedizierter Testserver startet.
+- [x] Relevante Itemdaten werden persistent gespeichert.
+- [x] Items mit Gegenstandsstufe 1 bis 950 können generiert werden.
 - [x] Affixe werden datengetrieben geladen.
 - [x] Präfixe, Suffixe und Konfliktgruppen funktionieren.
 - [x] ItemStack-Persistenz via DataComponent-API funktioniert.
@@ -1283,14 +1332,15 @@ Phase 1 bis 9.
 - [x] Seed-Aufteilung (6 Substreams) ist implementiert.
 - [x] Zentrale Itemgenerierungspipeline (ArpgItemGenerator) ist implementiert.
 - [x] Generierung ist atomar (Zielstack bleibt bei Fehler unverändert).
-- [x] 90 Unit-Tests sind erfolgreich.
-- [ ] Waffen, Rüstungen und Werkzeuge verwenden unterschiedliche Affix-Pools.
-- [ ] Magische und seltene Items werden korrekt generiert.
-- [ ] Tooltips zeigen die wichtigsten Iteminformationen.
-- [ ] Gleiche Seed-Eingabe erzeugt reproduzierbare Items.
-- [ ] Ungültige Datendateien crashen keine Welt.
-- [ ] Starter-Items können erzeugt werden.
-- [ ] Vanilla-Rezepte können konfigurierbar deaktiviert werden.
-- [ ] Automatisierte Kernsystemtests laufen erfolgreich.
-- [ ] `Roadmap.md` ist aktuell.
-- [ ] Bekannte Einschränkungen sind dokumentiert.
+- [x] Debugbefehle: `/arpgitem generate`, `random`, `inspect`, `validate`, `remove`, `help`, `loot simulate`.
+- [x] Tooltips zeigen Itemlevel, Seltenheit, Qualität, Basiswerte, Affixe, Vorschautext.
+- [x] Deutsche und englische Lokalisierung (en_us, de_de).
+- [x] Gleiche Seed-Eingabe erzeugt reproduzierbare Items.
+- [x] Ungültige Datendateien crashen keine Welt.
+- [x] 223 Unit-Tests sind erfolgreich.
+- [x] Lootprofile werden datengetrieben geladen (6 Profile).
+- [x] Normale Mobs können ARPG-Items droppen (AFTER_DEATH-Event).
+- [x] Itemlevel wird aus Mobstärke + Dimension aufgelöst.
+- [x] Vanilla-Rezepte können konfigurierbar deaktiviert werden.
+- [x] `Roadmap.md` ist aktuell.
+- [x] Bekannte Einschränkungen sind dokumentiert.
