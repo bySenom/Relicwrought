@@ -1,0 +1,16 @@
+package io.github.bysenom.relicwrought.combat;
+
+public enum CombatErrorCode {
+    NONE,
+    INVALID_ATTACKER,
+    INVALID_TARGET,
+    INVALID_WEAPON,
+    MISSING_ITEM_DATA,
+    INVALID_ITEM_DATA,
+    INVALID_DAMAGE_VALUE,
+    NUMERIC_OVERFLOW,
+    COMBAT_DISABLED,
+    PVP_DISABLED,
+    RECURSIVE_DAMAGE_BLOCKED,
+    CALCULATION_FAILED
+}
