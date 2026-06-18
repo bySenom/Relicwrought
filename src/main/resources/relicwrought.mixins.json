@@ -9,7 +9,6 @@
     "client.MinecraftMixin",
     "client.LivingEntityClientMixin",
     "client.HudMixin",
-    "client.MouseHandlerMixin",
     "client.GuiMixin"
   ],
   "injectors": {
