@@ -1,0 +1,22 @@
+﻿{
+  "id": "scout_helmet",
+  "translation_key": "item_base.relicwrought.scout_helmet",
+  "minecraft_item": "minecraft:leather_helmet",
+  "category": "helmet",
+  "valid_slots": ["head"],
+  "base_stats": {
+    "armor": 1.0,
+    "durability": 55
+  },
+  "implicit_affixes": [],
+  "affix_tags": ["armor", "light_armor"],
+  "scaling_profile": "armor_default",
+  "scaling": {
+    "armor_profile": "armor_default",
+    "durability_profile": "armor_durability_default",
+    "armor_multiplier": 0.75,
+    "durability_multiplier": 0.75
+  },
+  "loot_sources": ["normal_enemy", "chest"],
+  "data_version": 1
+}

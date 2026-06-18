@@ -1,0 +1,29 @@
+﻿{
+  "id": "local_physical_damage_percent",
+  "translation_key": "affix.relicwrought.local_physical_damage_percent",
+  "type": "prefix",
+  "group": "local_weapon_damage",
+  "groups": ["local_weapon_damage"],
+  "valid_item_categories": ["sword", "combat_axe", "bow", "crossbow"],
+  "scope": "local",
+  "components": [
+    {"stat": "physical_damage", "scope": "local", "operation": "additive_percent"}
+  ],
+  "weight": 100,
+  "conflict_groups": ["local_weapon_damage"],
+  "tags": ["weapon", "physical", "damage"],
+  "calculation": "additive_percent",
+  "data_version": 1,
+  "tiers": [
+    {"tier": "T10", "minimum_item_level": 1, "min_value": 5.0, "max_value": 12.0},
+    {"tier": "T9", "minimum_item_level": 100, "min_value": 13.0, "max_value": 20.0},
+    {"tier": "T8", "minimum_item_level": 200, "min_value": 21.0, "max_value": 30.0},
+    {"tier": "T7", "minimum_item_level": 300, "min_value": 31.0, "max_value": 42.0},
+    {"tier": "T6", "minimum_item_level": 400, "min_value": 43.0, "max_value": 56.0},
+    {"tier": "T5", "minimum_item_level": 500, "min_value": 57.0, "max_value": 72.0},
+    {"tier": "T4", "minimum_item_level": 600, "min_value": 73.0, "max_value": 90.0},
+    {"tier": "T3", "minimum_item_level": 700, "min_value": 91.0, "max_value": 112.0},
+    {"tier": "T2", "minimum_item_level": 800, "min_value": 113.0, "max_value": 140.0},
+    {"tier": "T1", "minimum_item_level": 900, "min_value": 141.0, "max_value": 175.0}
+  ]
+}

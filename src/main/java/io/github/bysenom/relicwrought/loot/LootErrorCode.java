@@ -1,0 +1,14 @@
+package io.github.bysenom.relicwrought.loot;
+
+public enum LootErrorCode {
+    NONE,
+    NO_LOOT_PROFILE,
+    INVALID_LOOT_PROFILE,
+    DROP_ROLL_FAILED,
+    NO_ELIGIBLE_ITEM_BASE,
+    ITEM_LEVEL_RESOLUTION_FAILED,
+    ITEM_GENERATION_FAILED,
+    DROP_SPAWN_FAILED,
+    FEATURE_DISABLED,
+    PLAYER_KILL_REQUIRED
+}

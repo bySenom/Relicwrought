@@ -1,0 +1,10 @@
+﻿{
+  "id": "legendary",
+  "display_name": "rarity.relicwrought.legendary",
+  "weight": 0,
+  "minimum_item_level": 50,
+  "allowed_affix_counts": [],
+  "display_order": 3,
+  "color": "#FFAA00",
+  "data_version": 1
+}

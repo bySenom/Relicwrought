@@ -1,0 +1,1 @@
+{"id":"all_elemental_resistance","max_per_item":1,"conflicts":["resistance_fire","resistance_cold","resistance_lightning"],"tags":["resistance"],"data_version":1}

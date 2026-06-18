@@ -1,0 +1,46 @@
+{
+  "id": "ender_dragon_boss",
+  "source_type": "boss",
+  "drop_chance": 1.0,
+  "drop_count": {
+    "minimum": 3,
+    "maximum": 5
+  },
+  "allowed_categories": [
+    "sword",
+    "combat_axe",
+    "helmet",
+    "chestplate",
+    "leggings",
+    "boots",
+    "pickaxe",
+    "tool_axe",
+    "shovel",
+    "hoe",
+    "shield"
+  ],
+  "required_item_tags": [],
+  "excluded_item_tags": [],
+  "rarity_weights": {
+    "common": 50,
+    "magic": 300,
+    "rare": 650
+  },
+  "item_level": {
+    "type": "source_scaled",
+    "minimum": 700,
+    "maximum": 900,
+    "random_variance": 20
+  },
+  "dimensions": ["minecraft:the_end"],
+  "entity_overrides": {
+    "minecraft:ender_dragon": {
+      "profile": "ender_dragon_boss",
+      "item_level_bonus": 30,
+      "drop_chance_bonus": 0.0,
+      "additional_drop_count": 1
+    }
+  },
+  "require_player_kill": true,
+  "data_version": 1
+}

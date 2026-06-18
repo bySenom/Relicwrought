@@ -1,0 +1,19 @@
+{
+  "id": "weapon_damage_default",
+  "stat": "weapon_damage",
+  "curve": {
+    "type": "piecewise",
+    "points": [
+      {"level": 1, "value": 5.0},
+      {"level": 50, "value": 40.0},
+      {"level": 150, "value": 200.0},
+      {"level": 300, "value": 1000.0},
+      {"level": 500, "value": 5000.0},
+      {"level": 700, "value": 20000.0},
+      {"level": 850, "value": 75000.0},
+      {"level": 950, "value": 250000.0}
+    ]
+  },
+  "rounding": "nearest",
+  "data_version": 1
+}

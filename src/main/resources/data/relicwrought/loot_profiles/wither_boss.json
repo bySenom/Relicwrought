@@ -1,0 +1,46 @@
+{
+  "id": "wither_boss",
+  "source_type": "boss",
+  "drop_chance": 1.0,
+  "drop_count": {
+    "minimum": 2,
+    "maximum": 3
+  },
+  "allowed_categories": [
+    "sword",
+    "combat_axe",
+    "helmet",
+    "chestplate",
+    "leggings",
+    "boots",
+    "pickaxe",
+    "tool_axe",
+    "shovel",
+    "hoe",
+    "shield"
+  ],
+  "required_item_tags": [],
+  "excluded_item_tags": [],
+  "rarity_weights": {
+    "common": 100,
+    "magic": 400,
+    "rare": 500
+  },
+  "item_level": {
+    "type": "source_scaled",
+    "minimum": 650,
+    "maximum": 850,
+    "random_variance": 15
+  },
+  "dimensions": ["minecraft:nether", "minecraft:overworld"],
+  "entity_overrides": {
+    "minecraft:wither": {
+      "profile": "wither_boss",
+      "item_level_bonus": 20,
+      "drop_chance_bonus": 0.0,
+      "additional_drop_count": 0
+    }
+  },
+  "require_player_kill": true,
+  "data_version": 1
+}

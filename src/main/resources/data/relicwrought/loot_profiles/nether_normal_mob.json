@@ -1,0 +1,40 @@
+{
+  "id": "nether_normal_mob",
+  "source_type": "normal_mob",
+  "drop_chance": 0.10,
+  "drop_count": {
+    "minimum": 1,
+    "maximum": 1
+  },
+  "allowed_categories": [
+    "sword",
+    "combat_axe",
+    "helmet",
+    "chestplate",
+    "leggings",
+    "boots",
+    "pickaxe",
+    "tool_axe",
+    "shovel",
+    "hoe",
+    "shield"
+  ],
+  "required_item_tags": [],
+  "excluded_item_tags": [],
+  "rarity_weights": {
+    "common": 500,
+    "magic": 350,
+    "rare": 150
+  },
+  "item_level": {
+    "type": "source_scaled",
+    "minimum": 250,
+    "maximum": 650,
+    "random_variance": 8
+  },
+  "dimensions": [
+    "minecraft:nether"
+  ],
+  "require_player_kill": true,
+  "data_version": 1
+}

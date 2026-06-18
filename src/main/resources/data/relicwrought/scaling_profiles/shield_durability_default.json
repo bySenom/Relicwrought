@@ -1,0 +1,17 @@
+{
+  "id": "shield_durability_default",
+  "stat": "shield_durability",
+  "curve": {
+    "type": "piecewise",
+    "points": [
+      {"level": 1, "value": 120.0},
+      {"level": 100, "value": 380.0},
+      {"level": 300, "value": 1300.0},
+      {"level": 500, "value": 3000.0},
+      {"level": 700, "value": 6500.0},
+      {"level": 950, "value": 15000.0}
+    ]
+  },
+  "rounding": "nearest",
+  "data_version": 1
+}

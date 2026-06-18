@@ -1,0 +1,18 @@
+﻿{
+  "id": "rare",
+  "display_name": "rarity.relicwrought.rare",
+  "weight": 50,
+  "minimum_item_level": 10,
+  "allowed_affix_counts": [
+    {"prefixes": 2, "suffixes": 1, "weight": 100},
+    {"prefixes": 1, "suffixes": 2, "weight": 100},
+    {"prefixes": 2, "suffixes": 2, "weight": 70},
+    {"prefixes": 3, "suffixes": 1, "weight": 40},
+    {"prefixes": 1, "suffixes": 3, "weight": 40},
+    {"prefixes": 3, "suffixes": 2, "weight": 15},
+    {"prefixes": 2, "suffixes": 3, "weight": 15}
+  ],
+  "display_order": 2,
+  "color": "#FFFF55",
+  "data_version": 1
+}

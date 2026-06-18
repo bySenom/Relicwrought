@@ -1,0 +1,10 @@
+﻿{
+  "id": "common",
+  "display_name": "rarity.relicwrought.common",
+  "weight": 650,
+  "minimum_item_level": 1,
+  "allowed_affix_counts": [],
+  "display_order": 0,
+  "color": "#FFFFFF",
+  "data_version": 1
+}

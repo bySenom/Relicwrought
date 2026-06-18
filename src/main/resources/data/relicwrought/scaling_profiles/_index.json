@@ -1,0 +1,10 @@
+[
+  "weapon_damage_default.json",
+  "armor_default.json",
+  "weapon_durability_default.json",
+  "armor_durability_default.json",
+  "tool_durability_default.json",
+  "shield_durability_default.json",
+  "mining_speed_default.json",
+  "mining_tier_default.json"
+]

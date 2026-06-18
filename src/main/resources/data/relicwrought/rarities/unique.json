@@ -1,0 +1,10 @@
+﻿{
+  "id": "unique",
+  "display_name": "rarity.relicwrought.unique",
+  "weight": 0,
+  "minimum_item_level": 1,
+  "allowed_affix_counts": [],
+  "display_order": 4,
+  "color": "#FF55FF",
+  "data_version": 1
+}

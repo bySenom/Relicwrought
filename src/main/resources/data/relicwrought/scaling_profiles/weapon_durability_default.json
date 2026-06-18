@@ -1,0 +1,17 @@
+{
+  "id": "weapon_durability_default",
+  "stat": "weapon_durability",
+  "curve": {
+    "type": "piecewise",
+    "points": [
+      {"level": 1, "value": 80.0},
+      {"level": 100, "value": 250.0},
+      {"level": 300, "value": 800.0},
+      {"level": 500, "value": 1800.0},
+      {"level": 700, "value": 3600.0},
+      {"level": 950, "value": 9000.0}
+    ]
+  },
+  "rounding": "nearest",
+  "data_version": 1
+}

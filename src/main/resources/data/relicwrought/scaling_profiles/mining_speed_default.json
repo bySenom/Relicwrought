@@ -1,0 +1,18 @@
+{
+  "id": "mining_speed_default",
+  "stat": "mining_speed",
+  "curve": {
+    "type": "piecewise",
+    "points": [
+      {"level": 1, "value": 2.0},
+      {"level": 100, "value": 8.0},
+      {"level": 300, "value": 20.0},
+      {"level": 500, "value": 45.0},
+      {"level": 700, "value": 90.0},
+      {"level": 850, "value": 160.0},
+      {"level": 950, "value": 250.0}
+    ]
+  },
+  "rounding": "two_decimals",
+  "data_version": 1
+}

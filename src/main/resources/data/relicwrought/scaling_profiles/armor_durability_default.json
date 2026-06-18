@@ -1,0 +1,17 @@
+{
+  "id": "armor_durability_default",
+  "stat": "armor_durability",
+  "curve": {
+    "type": "piecewise",
+    "points": [
+      {"level": 1, "value": 100.0},
+      {"level": 100, "value": 320.0},
+      {"level": 300, "value": 1100.0},
+      {"level": 500, "value": 2500.0},
+      {"level": 700, "value": 5000.0},
+      {"level": 950, "value": 12000.0}
+    ]
+  },
+  "rounding": "nearest",
+  "data_version": 1
+}

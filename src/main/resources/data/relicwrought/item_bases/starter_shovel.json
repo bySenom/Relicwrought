@@ -1,0 +1,30 @@
+﻿{
+  "id": "starter_shovel",
+  "translation_key": "item_base.relicwrought.starter_shovel",
+  "minecraft_item": "minecraft:wooden_shovel",
+  "category": "shovel",
+  "valid_slots": ["main_hand"],
+  "base_stats": {
+    "damage_min": 1.0,
+    "damage_max": 2.0,
+    "attack_speed": 1.0,
+    "durability": 55,
+    "mining_speed": 2.0,
+    "mining_tier": 1
+  },
+  "implicit_affixes": [],
+  "affix_tags": ["tool", "shovel", "starter"],
+  "scaling_profile": "default_tool",
+  "scaling": {
+    "damage_profile": "weapon_damage_default",
+    "durability_profile": "tool_durability_default",
+    "mining_speed_profile": "mining_speed_default",
+    "mining_tier_profile": "mining_tier_default",
+    "minimum_damage_multiplier": 0.20,
+    "maximum_damage_multiplier": 0.30,
+    "durability_multiplier": 0.55,
+    "mining_speed_multiplier": 0.80
+  },
+  "loot_sources": ["starter_kit"],
+  "data_version": 1
+}

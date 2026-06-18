@@ -1,0 +1,17 @@
+{
+  "id": "tool_durability_default",
+  "stat": "tool_durability",
+  "curve": {
+    "type": "piecewise",
+    "points": [
+      {"level": 1, "value": 60.0},
+      {"level": 100, "value": 240.0},
+      {"level": 300, "value": 900.0},
+      {"level": 500, "value": 2200.0},
+      {"level": 700, "value": 5200.0},
+      {"level": 950, "value": 15000.0}
+    ]
+  },
+  "rounding": "nearest",
+  "data_version": 1
+}

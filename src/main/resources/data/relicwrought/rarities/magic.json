@@ -1,0 +1,14 @@
+﻿{
+  "id": "magic",
+  "display_name": "rarity.relicwrought.magic",
+  "weight": 300,
+  "minimum_item_level": 1,
+  "allowed_affix_counts": [
+    {"prefixes": 1, "suffixes": 0, "weight": 100},
+    {"prefixes": 0, "suffixes": 1, "weight": 100},
+    {"prefixes": 1, "suffixes": 1, "weight": 60}
+  ],
+  "display_order": 1,
+  "color": "#5555FF",
+  "data_version": 1
+}

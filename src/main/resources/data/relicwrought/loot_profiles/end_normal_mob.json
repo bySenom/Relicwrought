@@ -1,0 +1,40 @@
+{
+  "id": "end_normal_mob",
+  "source_type": "normal_mob",
+  "drop_chance": 0.12,
+  "drop_count": {
+    "minimum": 1,
+    "maximum": 1
+  },
+  "allowed_categories": [
+    "sword",
+    "combat_axe",
+    "helmet",
+    "chestplate",
+    "leggings",
+    "boots",
+    "pickaxe",
+    "tool_axe",
+    "shovel",
+    "hoe",
+    "shield"
+  ],
+  "required_item_tags": [],
+  "excluded_item_tags": [],
+  "rarity_weights": {
+    "common": 350,
+    "magic": 400,
+    "rare": 250
+  },
+  "item_level": {
+    "type": "source_scaled",
+    "minimum": 500,
+    "maximum": 750,
+    "random_variance": 10
+  },
+  "dimensions": [
+    "minecraft:the_end"
+  ],
+  "require_player_kill": true,
+  "data_version": 1
+}

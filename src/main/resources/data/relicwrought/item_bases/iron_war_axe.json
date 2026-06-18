@@ -1,0 +1,30 @@
+﻿{
+  "id": "iron_war_axe",
+  "translation_key": "item_base.relicwrought.iron_war_axe",
+  "minecraft_item": "minecraft:iron_axe",
+  "category": "combat_axe",
+  "valid_slots": ["main_hand"],
+  "base_stats": {
+    "damage_min": 8.0,
+    "damage_max": 14.0,
+    "attack_speed": 0.95,
+    "durability": 250,
+    "mining_speed": 6.0,
+    "mining_tier": 2
+  },
+  "implicit_affixes": [],
+  "affix_tags": ["weapon", "melee", "axe", "tool"],
+  "scaling_profile": "default_hybrid_axe",
+  "scaling": {
+    "damage_profile": "weapon_damage_default",
+    "durability_profile": "weapon_durability_default",
+    "mining_speed_profile": "mining_speed_default",
+    "mining_tier_profile": "mining_tier_default",
+    "minimum_damage_multiplier": 1.10,
+    "maximum_damage_multiplier": 1.45,
+    "durability_multiplier": 1.10,
+    "mining_speed_multiplier": 0.85
+  },
+  "loot_sources": ["normal_enemy", "chest"],
+  "data_version": 1
+}

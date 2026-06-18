@@ -1,0 +1,40 @@
+{
+  "id": "overworld_normal_mob",
+  "source_type": "normal_mob",
+  "drop_chance": 0.08,
+  "drop_count": {
+    "minimum": 1,
+    "maximum": 1
+  },
+  "allowed_categories": [
+    "sword",
+    "combat_axe",
+    "helmet",
+    "chestplate",
+    "leggings",
+    "boots",
+    "pickaxe",
+    "tool_axe",
+    "shovel",
+    "hoe",
+    "shield"
+  ],
+  "required_item_tags": [],
+  "excluded_item_tags": [],
+  "rarity_weights": {
+    "common": 650,
+    "magic": 300,
+    "rare": 50
+  },
+  "item_level": {
+    "type": "source_scaled",
+    "minimum": 1,
+    "maximum": 500,
+    "random_variance": 5
+  },
+  "dimensions": [
+    "minecraft:overworld"
+  ],
+  "require_player_kill": true,
+  "data_version": 1
+}

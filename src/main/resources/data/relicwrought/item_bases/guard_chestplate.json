@@ -1,0 +1,22 @@
+﻿{
+  "id": "guard_chestplate",
+  "translation_key": "item_base.relicwrought.guard_chestplate",
+  "minecraft_item": "minecraft:iron_chestplate",
+  "category": "chestplate",
+  "valid_slots": ["chest"],
+  "base_stats": {
+    "armor": 6.0,
+    "durability": 240
+  },
+  "implicit_affixes": [],
+  "affix_tags": ["armor", "heavy_armor"],
+  "scaling_profile": "armor_default",
+  "scaling": {
+    "armor_profile": "armor_default",
+    "durability_profile": "armor_durability_default",
+    "armor_multiplier": 1.40,
+    "durability_multiplier": 1.25
+  },
+  "loot_sources": ["normal_enemy", "chest"],
+  "data_version": 1
+}

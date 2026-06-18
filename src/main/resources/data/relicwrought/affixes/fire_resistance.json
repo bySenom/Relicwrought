@@ -1,0 +1,29 @@
+﻿{
+  "id": "fire_resistance",
+  "translation_key": "affix.relicwrought.fire_resistance",
+  "type": "suffix",
+  "group": "resistance_fire",
+  "groups": ["resistance_fire"],
+  "valid_item_categories": ["shield", "helmet", "chestplate", "leggings", "boots"],
+  "scope": "global",
+  "components": [
+    {"stat": "fire_resistance", "scope": "global", "operation": "additive_percent"}
+  ],
+  "weight": 100,
+  "conflict_groups": [],
+  "tags": ["resistance", "fire", "armor"],
+  "calculation": "additive_percent",
+  "data_version": 1,
+  "tiers": [
+    {"tier": "T10", "minimum_item_level": 1, "min_value": 2.0, "max_value": 5.0},
+    {"tier": "T9", "minimum_item_level": 100, "min_value": 6.0, "max_value": 9.0},
+    {"tier": "T8", "minimum_item_level": 200, "min_value": 10.0, "max_value": 13.0},
+    {"tier": "T7", "minimum_item_level": 300, "min_value": 14.0, "max_value": 17.0},
+    {"tier": "T6", "minimum_item_level": 400, "min_value": 18.0, "max_value": 21.0},
+    {"tier": "T5", "minimum_item_level": 500, "min_value": 22.0, "max_value": 26.0},
+    {"tier": "T4", "minimum_item_level": 600, "min_value": 27.0, "max_value": 31.0},
+    {"tier": "T3", "minimum_item_level": 700, "min_value": 32.0, "max_value": 36.0},
+    {"tier": "T2", "minimum_item_level": 800, "min_value": 37.0, "max_value": 42.0},
+    {"tier": "T1", "minimum_item_level": 900, "min_value": 43.0, "max_value": 50.0}
+  ]
+}

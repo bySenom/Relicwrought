@@ -1,0 +1,12 @@
+{
+  "id": "armor_default",
+  "stat": "armor",
+  "curve": {
+    "type": "power",
+    "minimum": 2.0,
+    "maximum": 100000.0,
+    "exponent": 2.2
+  },
+  "rounding": "nearest",
+  "data_version": 1
+}
