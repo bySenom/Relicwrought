@@ -18,6 +18,8 @@ import io.github.bysenom.relicwrought.player.ClassDefinition;
 import io.github.bysenom.relicwrought.player.ClassDefinitionJsonReader;
 import io.github.bysenom.relicwrought.player.StarterKitDefinition;
 import io.github.bysenom.relicwrought.player.StarterKitDefinitionJsonReader;
+import io.github.bysenom.relicwrought.progression.CharacterProgressionDefinition;
+import io.github.bysenom.relicwrought.progression.CharacterProgressionDefinitionJsonReader;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -42,6 +44,7 @@ public final class ArpgDataBootstrap {
         InMemoryDataRegistry<LootProfileDefinition> lootProfiles = new InMemoryDataRegistry<>();
         InMemoryDataRegistry<ClassDefinition> classes = new InMemoryDataRegistry<>();
         InMemoryDataRegistry<StarterKitDefinition> starterKits = new InMemoryDataRegistry<>();
+        InMemoryDataRegistry<CharacterProgressionDefinition> progressionProfiles = new InMemoryDataRegistry<>();
         List<String> errors = new ArrayList<>();
 
         loadIndexedDefinitions(modId, "scaling_profiles", new ScalingProfileJsonReader(), scalingProfiles, errors, logger);
@@ -52,8 +55,9 @@ public final class ArpgDataBootstrap {
         loadIndexedDefinitions(modId, "loot_profiles", new LootProfileDefinitionJsonReader(), lootProfiles, errors, logger);
         loadIndexedDefinitions(modId, "classes", new ClassDefinitionJsonReader(), classes, errors, logger);
         loadIndexedDefinitions(modId, "starter_kits", new StarterKitDefinitionJsonReader(), starterKits, errors, logger);
+        loadIndexedDefinitions(modId, "progression_profiles", new CharacterProgressionDefinitionJsonReader(), progressionProfiles, errors, logger);
 
-        return new DefinitionLoadResult(itemBases, affixes, affixGroups, scalingProfiles, rarities, lootProfiles, classes, starterKits, errors);
+        return new DefinitionLoadResult(itemBases, affixes, affixGroups, scalingProfiles, rarities, lootProfiles, classes, starterKits, progressionProfiles, errors);
     }
 
     private static <T extends io.github.bysenom.relicwrought.item.model.KeyedDefinition> void loadIndexedDefinitions(

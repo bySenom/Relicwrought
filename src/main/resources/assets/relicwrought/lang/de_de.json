@@ -133,5 +133,20 @@
   "affix.relicwrought.intelligence": "Intelligenz",
   "affix.relicwrought.tool_harvest_luck": "Ernte-Glueck",
   "affix.relicwrought.tool_reach": "Werkzeugreichweite",
-  "affix.relicwrought.tool_efficiency_flat": "Werkzeugeffizienz"
+  "affix.relicwrought.tool_efficiency_flat": "Werkzeugeffizienz",
+  "stat.relicwrought.vitality": "Vitalitaet",
+  "stat.relicwrought.willpower": "Willenskraft",
+  "command.relicwrought.progression.level": "Stufe: %s",
+  "command.relicwrought.progression.xp": "EP: %s / %s",
+  "command.relicwrought.progression.total_xp": "Gesamt-EP: %s",
+  "command.relicwrought.progression.attribute_points": "Verfuegbare Attributpunkte: %s",
+  "command.relicwrought.progression.attribute_line": "%s: %s (Basis) + %s (verteilt) = %s",
+  "command.relicwrought.progression.level_up": "§aStufenaufstieg! Du hast Stufe %s erreicht. §e+%s Attributpunkt(e) verfuegbar.",
+  "command.relicwrought.progression.xp_gain": "§7+%s EP",
+  "command.relicwrought.progression.xp_granted": "%s EP an %s vergeben (jetzt Stufe %s)",
+  "command.relicwrought.progression.level_set": "Stufe von %s auf %s gesetzt",
+  "command.relicwrought.progression.disabled": "Charakterprogression ist in der Config deaktiviert",
+  "command.relicwrought.progression.invalid_attribute": "Ungueltiges Attribut: %s",
+  "command.relicwrought.progression.attribute_added": "%s %s hinzugefuegt (gesamt: %s, %s Punkte uebrig)",
+  "progression.relicwrought.default_character_progression": "Standard-Charakterprogression"
 }

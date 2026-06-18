@@ -22,6 +22,7 @@ public final class ArpgItemSystems {
                 bootstrapResult.lootProfiles().size(),
                 bootstrapResult.classes().size(),
                 bootstrapResult.starterKits().size(),
+                bootstrapResult.progressionProfiles().size(),
                 bootstrapResult.errors().size()
         );
     }

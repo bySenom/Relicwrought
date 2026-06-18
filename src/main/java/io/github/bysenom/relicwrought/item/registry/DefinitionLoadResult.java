@@ -8,6 +8,7 @@ import io.github.bysenom.relicwrought.item.scaling.ScalingProfile;
 import io.github.bysenom.relicwrought.loot.LootProfileDefinition;
 import io.github.bysenom.relicwrought.player.ClassDefinition;
 import io.github.bysenom.relicwrought.player.StarterKitDefinition;
+import io.github.bysenom.relicwrought.progression.CharacterProgressionDefinition;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public record DefinitionLoadResult(
         InMemoryDataRegistry<LootProfileDefinition> lootProfiles,
         InMemoryDataRegistry<ClassDefinition> classes,
         InMemoryDataRegistry<StarterKitDefinition> starterKits,
+        InMemoryDataRegistry<CharacterProgressionDefinition> progressionProfiles,
         List<String> errors
 ) {
     public DefinitionLoadResult {
@@ -32,6 +34,7 @@ public record DefinitionLoadResult(
                 new InMemoryDataRegistry<>(), new InMemoryDataRegistry<>(),
                 new InMemoryDataRegistry<>(), new InMemoryDataRegistry<>(),
                 new InMemoryDataRegistry<>(), new InMemoryDataRegistry<>(),
+                new InMemoryDataRegistry<>(),
                 List.of()
         );
     }

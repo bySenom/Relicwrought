@@ -133,5 +133,20 @@
   "affix.relicwrought.intelligence": "intelligence",
   "affix.relicwrought.tool_harvest_luck": "harvest luck",
   "affix.relicwrought.tool_reach": "tool reach",
-  "affix.relicwrought.tool_efficiency_flat": "tool efficiency"
+  "affix.relicwrought.tool_efficiency_flat": "tool efficiency",
+  "stat.relicwrought.vitality": "Vitality",
+  "stat.relicwrought.willpower": "Willpower",
+  "command.relicwrought.progression.level": "Level: %s",
+  "command.relicwrought.progression.xp": "XP: %s / %s",
+  "command.relicwrought.progression.total_xp": "Total XP: %s",
+  "command.relicwrought.progression.attribute_points": "Available Attribute Points: %s",
+  "command.relicwrought.progression.attribute_line": "%s: %s (base) + %s (allocated) = %s",
+  "command.relicwrought.progression.level_up": "§aLevel Up! You reached level %s. §e+%s attribute point(s) available.",
+  "command.relicwrought.progression.xp_gain": "§7+%s XP",
+  "command.relicwrought.progression.xp_granted": "Granted %s XP to %s (now level %s)",
+  "command.relicwrought.progression.level_set": "Set %s level to %s",
+  "command.relicwrought.progression.disabled": "Character progression is disabled in config",
+  "command.relicwrought.progression.invalid_attribute": "Invalid attribute: %s",
+  "command.relicwrought.progression.attribute_added": "Added %s %s (total: %s, %s points remaining)",
+  "progression.relicwrought.default_character_progression": "Default Character Progression"
 }

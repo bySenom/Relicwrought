@@ -2,6 +2,7 @@ package io.github.bysenom.relicwrought;
 
 import io.github.bysenom.relicwrought.command.ArpgItemCommand;
 import io.github.bysenom.relicwrought.command.ClassCommand;
+import io.github.bysenom.relicwrought.command.ProgressionCommand;
 import io.github.bysenom.relicwrought.item.ArpgItemSystems;
 import io.github.bysenom.relicwrought.item.affix.AffixGenerator;
 import io.github.bysenom.relicwrought.item.generation.ArpgItemGenerator;
@@ -12,16 +13,23 @@ import io.github.bysenom.relicwrought.item.scaling.ItemStatScaler;
 import io.github.bysenom.relicwrought.loot.ArpgDropGenerator;
 import io.github.bysenom.relicwrought.loot.ArpgMobDropHandler;
 import io.github.bysenom.relicwrought.loot.LootProfileResolver;
+import io.github.bysenom.relicwrought.network.AttributeAllocationRequest;
 import io.github.bysenom.relicwrought.network.ClassSelectionNetworking;
+import io.github.bysenom.relicwrought.network.PlayerProgressionSyncPayload;
 import io.github.bysenom.relicwrought.player.ClassSelectionManager;
 import io.github.bysenom.relicwrought.player.PlayerProfileManager;
 import io.github.bysenom.relicwrought.player.StarterKitService;
+import io.github.bysenom.relicwrought.progression.*;
 import io.github.bysenom.relicwrought.recipe.RecipeRemovalHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +43,8 @@ public final class Relicwrought implements ModInitializer {
     private static ArpgModConfig config;
     private static PlayerProfileManager profileManager;
     private static ClassSelectionManager selectionManager;
+    private static ProgressionManager progressionManager;
+    private static MobExperienceResolver mobXpResolver;
 
     @Override
     public void onInitialize() {
@@ -45,6 +55,8 @@ public final class Relicwrought implements ModInitializer {
         ArpgItemComponents.register();
         ClassSelectionNetworking.registerC2SPayloads();
         ClassSelectionNetworking.registerS2CPayloads();
+        PayloadTypeRegistry.clientboundPlay().register(PlayerProgressionSyncPayload.TYPE, PlayerProgressionSyncPayload.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(AttributeAllocationRequest.TYPE, AttributeAllocationRequest.STREAM_CODEC);
         ArpgItemSystems.initialize();
 
         DefinitionLoadResult definitions = ArpgItemSystems.bootstrapResult();
@@ -80,6 +92,32 @@ public final class Relicwrought implements ModInitializer {
                         definitions.classes().size(), definitions.starterKits().size());
             }
 
+            if (config.enableCharacterProgression() && config.enableClassSelection()) {
+                if (profileManager == null) {
+                    profileManager = PlayerProfileManager.get(server);
+                }
+                progressionManager = new ProgressionManager(definitions.progressionProfiles(), profileManager);
+                mobXpResolver = new MobExperienceResolver(config);
+
+                ServerPlayNetworking.registerGlobalReceiver(AttributeAllocationRequest.TYPE, (payload, context) -> {
+                    context.server().execute(() -> {
+                        var player = context.player();
+                        if (progressionManager == null) return;
+                        CharacterAttribute attr = payload.resolveAttribute();
+                        if (attr == null) {
+                            player.sendSystemMessage(Component.translatable("command.relicwrought.progression.invalid_attribute", payload.attributeName()));
+                            return;
+                        }
+                        var result = progressionManager.allocateAttribute(player, attr, payload.amount());
+                        if (!result.success()) {
+                            player.sendSystemMessage(Component.literal("§c" + result.errorMessage()));
+                        }
+                    });
+                });
+
+                LOGGER.info("Character progression system initialized");
+            }
+
             if (config.disableVanillaEquipmentRecipes()) {
                 var recipeManager = server.getRecipeManager();
                 var registryAccess = server.registryAccess();
@@ -94,6 +132,57 @@ public final class Relicwrought implements ModInitializer {
                 if (!selectionManager.hasSelectedClass(player)) {
                     if (config.showClassScreenOnFirstJoin()) {
                         ClassSelectionNetworking.sendClassSelectionPrompt(player);
+                    }
+                }
+            }
+
+            if (config.enableCharacterProgression() && progressionManager != null) {
+                var player = handler.getPlayer();
+                var prog = progressionManager.getProgression(player);
+                PlayerProgressionSyncPayload syncPayload = new PlayerProgressionSyncPayload(
+                        prog.level().value(),
+                        prog.currentLevelXp(),
+                        progressionManager.getXpForNextLevel(player),
+                        prog.totalXp(),
+                        prog.unspentAttributePoints(),
+                        prog.allocatedAttributes(),
+                        progressionManager.getTotalAttributes(player)
+                );
+                ServerPlayNetworking.send(player, syncPayload);
+            }
+        });
+
+        ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
+            mobDropHandler.onLivingDeath(entity);
+
+            if (config.enableCharacterProgression() && progressionManager != null && mobXpResolver != null) {
+                if (!entity.level().isClientSide()) {
+                    var killer = findPlayerKiller(entity);
+                    if (killer instanceof ServerPlayer serverKiller) {
+                        long xp = mobXpResolver.resolveXp(entity, serverKiller);
+                        if (xp > 0) {
+                            ExperienceGrantResult result = progressionManager.grantXp(serverKiller, xp);
+                            if (result.success()) {
+                                if (config.showXpGainMessages() && result.xpGranted() > 0) {
+                                    serverKiller.sendSystemMessage(Component.translatable("command.relicwrought.progression.xp_gain", result.xpGranted()));
+                                }
+                                if (config.showLevelUpMessages() && result.levelUps() > 0) {
+                                    serverKiller.sendSystemMessage(Component.translatable("command.relicwrought.progression.level_up",
+                                            result.levelAfter().value(), result.newAttributePoints()));
+                                }
+                                var prog = progressionManager.getProgression(serverKiller);
+                                PlayerProgressionSyncPayload syncPayload = new PlayerProgressionSyncPayload(
+                                        prog.level().value(),
+                                        prog.currentLevelXp(),
+                                        progressionManager.getXpForNextLevel(serverKiller),
+                                        prog.totalXp(),
+                                        prog.unspentAttributePoints(),
+                                        prog.allocatedAttributes(),
+                                        progressionManager.getTotalAttributes(serverKiller)
+                                );
+                                ServerPlayNetworking.send(serverKiller, syncPayload);
+                            }
+                        }
                     }
                 }
             }
@@ -112,6 +201,9 @@ public final class Relicwrought implements ModInitializer {
             if (selectionManager != null) {
                 ClassCommand.register(dispatcher, selectionManager);
             }
+            if (progressionManager != null) {
+                ProgressionCommand.register(dispatcher, progressionManager, config);
+            }
         });
 
         LOGGER.info("Relicwrought initialized: mob drops={}, recipe removal={}, class selection={}",
@@ -121,5 +213,11 @@ public final class Relicwrought implements ModInitializer {
 
     public static ArpgModConfig config() {
         return config;
+    }
+
+    private static net.minecraft.world.entity.player.Player findPlayerKiller(net.minecraft.world.entity.LivingEntity entity) {
+        if (entity.getLastAttacker() instanceof net.minecraft.world.entity.player.Player player) return player;
+        if (entity.getKillCredit() instanceof net.minecraft.world.entity.player.Player player) return player;
+        return null;
     }
 }

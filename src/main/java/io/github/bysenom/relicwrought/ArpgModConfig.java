@@ -27,7 +27,15 @@ public record ArpgModConfig(
         boolean autoEquipStarterArmor,
         boolean dropStarterItemsWhenInventoryFull,
         boolean allowAdminClassReset,
-        boolean disableVanillaEquipmentRecipesAfterSelection
+        boolean disableVanillaEquipmentRecipesAfterSelection,
+        boolean enableCharacterProgression,
+        int maximumCharacterLevel,
+        boolean requirePlayerKillForXp,
+        double xpMultiplier,
+        boolean showXpGainMessages,
+        boolean showLevelUpMessages,
+        int attributePointsPerLevel,
+        boolean allowAdminLevelCommands
 ) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String CONFIG_FILE_NAME = "relicwrought.json";
@@ -50,6 +58,14 @@ public record ArpgModConfig(
                 true,
                 true,
                 true,
+                true,
+                true,
+                100,
+                true,
+                1.0,
+                true,
+                true,
+                1,
                 true
         );
     }
@@ -90,6 +106,16 @@ public record ArpgModConfig(
         Set<String> categories = config.disabledRecipeCategories();
         if (categories == null) { categories = new HashSet<>(); modified = true; }
 
+        int maxLevel = config.maximumCharacterLevel();
+        if (maxLevel < 1) { maxLevel = 100; modified = true; }
+        if (maxLevel > 100) { maxLevel = 100; modified = true; }
+
+        double xpMult = config.xpMultiplier();
+        if (xpMult < 0.0) { xpMult = 0.0; modified = true; }
+
+        int attrPoints = config.attributePointsPerLevel();
+        if (attrPoints < 0) { attrPoints = 0; modified = true; }
+
         if (modified) {
             ArpgModConfig validated = new ArpgModConfig(
                     config.enableArpgMobDrops(), chance, config.requirePlayerKill(),
@@ -99,7 +125,11 @@ public record ArpgModConfig(
                     config.enableClassSelection(), config.showClassScreenOnFirstJoin(),
                     config.allowCommandClassSelection(), config.grantStarterKit(),
                     config.autoEquipStarterArmor(), config.dropStarterItemsWhenInventoryFull(),
-                    config.allowAdminClassReset(), config.disableVanillaEquipmentRecipesAfterSelection()
+                    config.allowAdminClassReset(), config.disableVanillaEquipmentRecipesAfterSelection(),
+                    config.enableCharacterProgression(), maxLevel,
+                    config.requirePlayerKillForXp(), xpMult,
+                    config.showXpGainMessages(), config.showLevelUpMessages(),
+                    attrPoints, config.allowAdminLevelCommands()
             );
             return save(configPath, validated, logger);
         }

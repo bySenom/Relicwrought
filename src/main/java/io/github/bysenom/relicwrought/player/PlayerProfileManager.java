@@ -4,12 +4,16 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.github.bysenom.relicwrought.Relicwrought;
+import io.github.bysenom.relicwrought.progression.CharacterAttribute;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,17 +58,15 @@ public final class PlayerProfileManager {
         if (Files.exists(savePath)) {
             try {
                 String content = Files.readString(savePath);
-                Map<String, PlayerProfileData> raw = GSON.fromJson(content,
-                        new TypeToken<Map<String, PlayerProfileData>>() {}.getType());
-                if (raw != null) {
-                    for (var entry : raw.entrySet()) {
+                Map<String, Object> rawMap = GSON.fromJson(content,
+                        new TypeToken<Map<String, Object>>() {}.getType());
+                if (rawMap != null) {
+                    for (var entry : rawMap.entrySet()) {
                         UUID uuid = UUID.fromString(entry.getKey());
-                        PlayerProfileData data = entry.getValue();
-                        profiles.put(uuid, new PlayerArpgProfile(
-                                data.dataVersion, data.classSelected, data.classId,
-                                data.starterKitGranted, data.starterKitId,
-                                data.starterKitVersion, data.selectionTimestamp
-                        ));
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> data = (Map<String, Object>) entry.getValue();
+                        PlayerArpgProfile profile = deserializeProfile(data);
+                        profiles.put(uuid, profile);
                     }
                 }
             } catch (Exception e) {
@@ -73,17 +75,92 @@ public final class PlayerProfileManager {
         }
     }
 
+    private PlayerArpgProfile deserializeProfile(Map<String, Object> data) {
+        int dataVersion = getInt(data, "dataVersion", 0);
+
+        if (dataVersion == 0) {
+            return PlayerArpgProfile.empty();
+        }
+
+        boolean classSelected = getBool(data, "classSelected", false);
+        String classId = getStr(data, "classId", "");
+        boolean starterKitGranted = getBool(data, "starterKitGranted", false);
+        String starterKitId = getStr(data, "starterKitId", "");
+        int starterKitVersion = getInt(data, "starterKitVersion", 0);
+        long selectionTimestamp = getLong(data, "selectionTimestamp", 0L);
+
+        if (dataVersion < PlayerArpgProfile.CURRENT_VERSION) {
+            Relicwrought.LOGGER.info("Migrating player profile v{} -> v{}", dataVersion, PlayerArpgProfile.CURRENT_VERSION);
+            PlayerArpgProfile v1 = new PlayerArpgProfile(
+                    dataVersion, classSelected, classId, starterKitGranted,
+                    starterKitId, starterKitVersion, selectionTimestamp,
+                    io.github.bysenom.relicwrought.progression.CharacterLevel.MIN,
+                    0L, 0L, 0, PlayerArpgProfile.emptyAttributes()
+            );
+            return PlayerArpgProfile.legacyV1ToV2(v1);
+        }
+
+        int characterLevel = getInt(data, "characterLevel", io.github.bysenom.relicwrought.progression.CharacterLevel.MIN);
+        long currentLevelXp = getLong(data, "currentLevelXp", 0L);
+        long totalXp = getLong(data, "totalXp", 0L);
+        int unspentAttributePoints = getInt(data, "unspentAttributePoints", 0);
+
+        Map<CharacterAttribute, Integer> allocated = PlayerArpgProfile.emptyAttributes();
+        if (data.containsKey("allocatedAttributes")) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> rawAttrs = (Map<String, Object>) data.get("allocatedAttributes");
+            Map<CharacterAttribute, Integer> attrs = new EnumMap<>(CharacterAttribute.class);
+            for (var attrEntry : rawAttrs.entrySet()) {
+                try {
+                    CharacterAttribute attr = CharacterAttribute.valueOf(attrEntry.getKey().toUpperCase());
+                    attrs.put(attr, ((Number) attrEntry.getValue()).intValue());
+                } catch (IllegalArgumentException e) {
+                    Relicwrought.LOGGER.warn("Unknown attribute key: {}", attrEntry.getKey());
+                }
+            }
+            for (var attr : CharacterAttribute.values()) {
+                attrs.putIfAbsent(attr, 0);
+            }
+            allocated = Collections.unmodifiableMap(attrs);
+        }
+
+        return new PlayerArpgProfile(
+                PlayerArpgProfile.CURRENT_VERSION,
+                classSelected, classId, starterKitGranted,
+                starterKitId, starterKitVersion, selectionTimestamp,
+                characterLevel, currentLevelXp, totalXp,
+                unspentAttributePoints, allocated
+        );
+    }
+
     public void save() {
         if (!dirty) return;
         try {
-            Map<String, PlayerProfileData> raw = new java.util.LinkedHashMap<>();
+            Map<String, Object> raw = new LinkedHashMap<>();
             for (var entry : profiles.entrySet()) {
                 PlayerArpgProfile p = entry.getValue();
-                raw.put(entry.getKey().toString(), new PlayerProfileData(
-                        p.dataVersion(), p.classSelected(), p.classId(),
-                        p.starterKitGranted(), p.starterKitId(),
-                        p.starterKitVersion(), p.selectionTimestamp()
-                ));
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("dataVersion", p.dataVersion());
+                data.put("classSelected", p.classSelected());
+                data.put("classId", p.classId());
+                data.put("starterKitGranted", p.starterKitGranted());
+                data.put("starterKitId", p.starterKitId());
+                data.put("starterKitVersion", p.starterKitVersion());
+                data.put("selectionTimestamp", p.selectionTimestamp());
+                data.put("characterLevel", p.characterLevel());
+                data.put("currentLevelXp", p.currentLevelXp());
+                data.put("totalXp", p.totalXp());
+                data.put("unspentAttributePoints", p.unspentAttributePoints());
+
+                Map<String, Integer> attrs = new LinkedHashMap<>();
+                if (p.allocatedAttributes() != null) {
+                    for (var attrEntry : p.allocatedAttributes().entrySet()) {
+                        attrs.put(attrEntry.getKey().name().toLowerCase(), attrEntry.getValue());
+                    }
+                }
+                data.put("allocatedAttributes", attrs);
+
+                raw.put(entry.getKey().toString(), data);
             }
             Files.createDirectories(savePath.getParent());
             Files.writeString(savePath, GSON.toJson(raw));
@@ -97,9 +174,27 @@ public final class PlayerProfileManager {
         dirty = true;
     }
 
-    private record PlayerProfileData(
-            int dataVersion, boolean classSelected, String classId,
-            boolean starterKitGranted, String starterKitId,
-            int starterKitVersion, long selectionTimestamp
-    ) {}
+    private static int getInt(Map<String, Object> map, String key, int def) {
+        Object v = map.get(key);
+        if (v instanceof Number n) return n.intValue();
+        return def;
+    }
+
+    private static long getLong(Map<String, Object> map, String key, long def) {
+        Object v = map.get(key);
+        if (v instanceof Number n) return n.longValue();
+        return def;
+    }
+
+    private static boolean getBool(Map<String, Object> map, String key, boolean def) {
+        Object v = map.get(key);
+        if (v instanceof Boolean b) return b;
+        return def;
+    }
+
+    private static String getStr(Map<String, Object> map, String key, String def) {
+        Object v = map.get(key);
+        if (v instanceof String s) return s;
+        return def;
+    }
 }
