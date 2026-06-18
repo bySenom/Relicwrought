@@ -226,13 +226,48 @@ public final class AffixGenerator {
         );
     }
 
-    public int countAvailableAffixes(AffixType type, ItemBaseDefinition base, ItemLevel itemLevel) {
-        return (int) affixes.values().stream()
+    public boolean canFulfillSlots(ItemBaseDefinition base, ItemLevel itemLevel, AffixSlotLimits limits, List<AffixRoll> existingAffixes) {
+        List<String> messages = new ArrayList<>();
+        List<AffixDefinition> existing = resolveExistingDefinitions(existingAffixes, messages);
+        if (!messages.isEmpty()) {
+            return false;
+        }
+
+        return canPickN(base, itemLevel, AffixType.PREFIX, limits.prefixes(), existing)
+                && canPickN(base, itemLevel, AffixType.SUFFIX, limits.suffixes(), existing);
+    }
+
+    private boolean canPickN(ItemBaseDefinition base, ItemLevel level, AffixType type, int n, List<AffixDefinition> existing) {
+        if (n == 0) return true;
+
+        List<AffixDefinition> candidates = affixes.values().stream()
                 .filter(affix -> affix.type() == type)
                 .filter(affix -> affix.appliesTo(base.category()))
                 .filter(affix -> tagsAllow(affix, base.affixTags()))
-                .filter(affix -> affix.tiers().stream().anyMatch(tier -> tier.isUnlockedAt(itemLevel)))
-                .count();
+                .filter(affix -> affix.tiers().stream().anyMatch(tier -> tier.isUnlockedAt(level)))
+                .filter(affix -> !alreadySelected(affix, existing))
+                .filter(affix -> groupsAllow(affix, existing))
+                .toList();
+
+        if (candidates.size() < n) return false;
+
+        return backtrackPickN(candidates, 0, n, existing);
+    }
+
+    private boolean backtrackPickN(List<AffixDefinition> candidates, int startIndex, int remaining, List<AffixDefinition> currentSelection) {
+        if (remaining == 0) return true;
+        if (candidates.size() - startIndex < remaining) return false;
+
+        for (int i = startIndex; i < candidates.size(); i++) {
+            AffixDefinition candidate = candidates.get(i);
+            if (groupsAllow(candidate, currentSelection)) {
+                currentSelection.add(candidate);
+                boolean canFinish = backtrackPickN(candidates, i + 1, remaining - 1, currentSelection);
+                currentSelection.remove(currentSelection.size() - 1);
+                if (canFinish) return true;
+            }
+        }
+        return false;
     }
 
     private static <T> T selectWeighted(List<T> sortedCandidates, WeightGetter<T> weightGetter, SplittableRandom random) {

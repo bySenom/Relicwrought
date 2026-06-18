@@ -7,6 +7,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 public class RelicwroughtClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        io.github.bysenom.relicwrought.client.tooltip.ArpgItemTooltipAppender.register();
+        io.github.bysenom.relicwrought.client.screen.ClassSelectionClientState.register();
+
         ClientPlayNetworking.registerGlobalReceiver(WeaponCooldownSyncPayload.TYPE, (payload, context) -> {
             context.client().execute(() -> {
                 io.github.bysenom.relicwrought.combat.cooldown.WeaponAttackState clientState = 

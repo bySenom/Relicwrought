@@ -38,29 +38,31 @@ public final class StarterKitService {
                     continue;
                 }
 
+                ItemStack deliveryStack = stack.copy();
+
                 if (entry.autoEquip()) {
                     EquipmentSlot slot = resolveSlot(entry.slot());
                     if (slot != null && !player.getItemBySlot(slot).is(Items.AIR)) {
-                        if (!player.getInventory().add(stack)) {
-                            dropItem(player, stack);
+                        if (!player.getInventory().add(deliveryStack)) {
+                            dropItem(player, stack.copy());
                             dropped++;
                         } else {
                             inserted++;
                         }
                     } else if (slot != null) {
-                        player.setItemSlot(slot, stack);
+                        player.setItemSlot(slot, deliveryStack);
                         equipped++;
                     } else {
-                        if (!player.getInventory().add(stack)) {
-                            dropItem(player, stack);
+                        if (!player.getInventory().add(deliveryStack)) {
+                            dropItem(player, stack.copy());
                             dropped++;
                         } else {
                             inserted++;
                         }
                     }
                 } else {
-                    if (!player.getInventory().add(stack)) {
-                        dropItem(player, stack);
+                    if (!player.getInventory().add(deliveryStack)) {
+                        dropItem(player, stack.copy());
                         dropped++;
                     } else {
                         inserted++;

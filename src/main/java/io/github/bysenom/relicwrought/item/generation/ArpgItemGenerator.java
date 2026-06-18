@@ -79,12 +79,7 @@ public final class ArpgItemGenerator {
             AffixSlotLimits slotLimits;
             try {
                 slotLimits = slotSelector.select(rarity, seeds.slotsSeed(), limits -> {
-                    int availablePrefixes = affixGenerator.countAvailableAffixes(
-                            AffixType.PREFIX, base, request.itemLevel());
-                    int availableSuffixes = affixGenerator.countAvailableAffixes(
-                            AffixType.SUFFIX, base, request.itemLevel());
-                    return limits.prefixes() <= availablePrefixes
-                            && limits.suffixes() <= availableSuffixes;
+                    return affixGenerator.canFulfillSlots(base, request.itemLevel(), limits, List.of());
                 });
             } catch (Exception e) {
                 return ItemGenerationResult.failure(GenerationErrorCode.NO_VALID_SLOT_DISTRIBUTION, e.getMessage());

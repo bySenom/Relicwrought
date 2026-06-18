@@ -178,9 +178,10 @@ public final class ArpgItemCommand {
         }
 
         ItemStack stack = result.itemStack();
-        Component displayName = stack.getDisplayName().copy();
-        if (!player.getInventory().add(stack)) {
-            ItemEntity entity = player.drop(stack, false);
+        ItemStack deliveryStack = stack.copy();
+        Component displayName = stack.getHoverName().copy();
+        if (!player.getInventory().add(deliveryStack)) {
+            ItemEntity entity = player.drop(stack.copy(), false);
             if (entity != null) {
                 entity.setNoPickUpDelay();
             }
@@ -230,9 +231,10 @@ public final class ArpgItemCommand {
         }
 
         ItemStack stack = result.itemStack();
-        Component displayName = stack.getDisplayName().copy();
-        if (!player.getInventory().add(stack)) {
-            ItemEntity entity = player.drop(stack, false);
+        ItemStack deliveryStack = stack.copy();
+        Component displayName = stack.getHoverName().copy();
+        if (!player.getInventory().add(deliveryStack)) {
+            ItemEntity entity = player.drop(stack.copy(), false);
             if (entity != null) {
                 entity.setNoPickUpDelay();
             }
