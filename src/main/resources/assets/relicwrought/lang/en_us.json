@@ -1,4 +1,4 @@
-﻿{
+{
   "modmenu.descriptionTranslation.relicwrought": "Action RPG systems for Minecraft.",
   "item_base.relicwrought.starter_training_sword": "Training Sword",
   "item_base.relicwrought.starter_pickaxe": "Starter Pickaxe",
@@ -148,5 +148,18 @@
   "command.relicwrought.progression.disabled": "Character progression is disabled in config",
   "command.relicwrought.progression.invalid_attribute": "Invalid attribute: %s",
   "command.relicwrought.progression.attribute_added": "Added %s %s (total: %s, %s points remaining)",
-  "progression.relicwrought.default_character_progression": "Default Character Progression"
+  "progression.relicwrought.default_character_progression": "Default Character Progression",
+  "command.relicwrought.combat.stats.header": "§6--- Combat Stats ---",
+  "command.relicwrought.combat.stats.physical": "§ePhysical Damage: §f+%.1f%%",
+  "command.relicwrought.combat.stats.elemental": "§eElemental Damage: §f+%.1f%%",
+  "command.relicwrought.combat.stats.attack_speed": "§eAttack Speed: §f+%.1f%%",
+  "command.relicwrought.combat.stats.crit_chance": "§eCritical Chance: §f%.1f%%",
+  "command.relicwrought.combat.stats.crit_multi": "§eCritical Multiplier: §f%.1f%%",
+  "command.relicwrought.combat.stats.armor": "§eArmor: §f%.1f",
+  "command.relicwrought.combat.stats.fire_res": "§eFire Resistance: §f%.1f%%",
+  "command.relicwrought.combat.stats.cold_res": "§eCold Resistance: §f%.1f%%",
+  "command.relicwrought.combat.stats.lightning_res": "§eLightning Resistance: §f%.1f%%",
+  "command.relicwrought.combat.stats.poison_res": "§ePoison Resistance: §f%.1f%%",
+  "command.relicwrought.combat.stats.movement": "§eMovement Speed: §f+%.1f%%",
+  "command.relicwrought.combat.stats.life": "§eMaximum Life: §f+%.1f"
 }

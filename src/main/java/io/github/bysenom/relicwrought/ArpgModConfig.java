@@ -35,7 +35,25 @@ public record ArpgModConfig(
         boolean showXpGainMessages,
         boolean showLevelUpMessages,
         int attributePointsPerLevel,
-        boolean allowAdminLevelCommands
+        boolean allowAdminLevelCommands,
+        boolean enableArpgCombat,
+        boolean enableArpgPvpDamage,
+        double baseCriticalChance,
+        double baseCriticalMultiplier,
+        double maximumCriticalChance,
+        double maximumPhysicalReduction,
+        double maximumElementalResistance,
+        double minimumElementalResistance,
+        double armorConstant,
+        double vanillaArmorConversion,
+        double strengthPhysicalDamagePerPoint,
+        double strengthArmorPerPoint,
+        double dexterityAttackSpeedPerPoint,
+        double dexterityCritChancePerPoint,
+        double intelligenceElementalDamagePerPoint,
+        double intelligenceResistancePerPoint,
+        double vitalityLifePerPoint,
+        boolean useVanillaAttackCooldown
 ) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String CONFIG_FILE_NAME = "relicwrought.json";
@@ -66,7 +84,25 @@ public record ArpgModConfig(
                 true,
                 true,
                 1,
-                true
+                true,
+                true,   // enableArpgCombat
+                false,  // enableArpgPvpDamage
+                0.05,   // baseCriticalChance (5%)
+                1.5,    // baseCriticalMultiplier (150%)
+                1.0,    // maximumCriticalChance (100%)
+                0.85,   // maximumPhysicalReduction (85%)
+                0.75,   // maximumElementalResistance (75%)
+                -1.0,   // minimumElementalResistance (-100%)
+                100.0,  // armorConstant
+                100.0,  // vanillaArmorConversion (1 armor = 100 ARPG armor)
+                0.002,  // strengthPhysicalDamagePerPoint (+1% per 5 STR = 0.002 per point)
+                1.0,    // strengthArmorPerPoint (+1 per STR)
+                0.001,  // dexterityAttackSpeedPerPoint (+0.1% per DEX = 0.001 per point)
+                0.0005, // dexterityCritChancePerPoint (+0.05% per DEX = 0.0005 per point)
+                0.002,  // intelligenceElementalDamagePerPoint (+1% per 5 INT = 0.002 per point)
+                0.002,  // intelligenceResistancePerPoint (+0.2% per INT = 0.002 per point)
+                5.0,    // vitalityLifePerPoint (+5 life per VIT)
+                true    // useVanillaAttackCooldown
         );
     }
 
@@ -116,6 +152,13 @@ public record ArpgModConfig(
         int attrPoints = config.attributePointsPerLevel();
         if (attrPoints < 0) { attrPoints = 0; modified = true; }
 
+        double maxPhysRed = config.maximumPhysicalReduction();
+        if (maxPhysRed < 0.0) { maxPhysRed = 0.0; modified = true; }
+        if (maxPhysRed > 1.0) { maxPhysRed = 1.0; modified = true; }
+
+        double maxResist = config.maximumElementalResistance();
+        if (maxResist > 1.0) { maxResist = 1.0; modified = true; }
+
         if (modified) {
             ArpgModConfig validated = new ArpgModConfig(
                     config.enableArpgMobDrops(), chance, config.requirePlayerKill(),
@@ -129,7 +172,16 @@ public record ArpgModConfig(
                     config.enableCharacterProgression(), maxLevel,
                     config.requirePlayerKillForXp(), xpMult,
                     config.showXpGainMessages(), config.showLevelUpMessages(),
-                    attrPoints, config.allowAdminLevelCommands()
+                    attrPoints, config.allowAdminLevelCommands(),
+                    config.enableArpgCombat(), config.enableArpgPvpDamage(),
+                    config.baseCriticalChance(), config.baseCriticalMultiplier(),
+                    config.maximumCriticalChance(), maxPhysRed,
+                    maxResist, config.minimumElementalResistance(),
+                    config.armorConstant(), config.vanillaArmorConversion(),
+                    config.strengthPhysicalDamagePerPoint(), config.strengthArmorPerPoint(),
+                    config.dexterityAttackSpeedPerPoint(), config.dexterityCritChancePerPoint(),
+                    config.intelligenceElementalDamagePerPoint(), config.intelligenceResistancePerPoint(),
+                    config.vitalityLifePerPoint(), config.useVanillaAttackCooldown()
             );
             return save(configPath, validated, logger);
         }

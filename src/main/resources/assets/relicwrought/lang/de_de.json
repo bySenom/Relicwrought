@@ -1,4 +1,4 @@
-﻿{
+{
   "modmenu.descriptionTranslation.relicwrought": "Action-RPG-Systeme fuer Minecraft.",
   "item_base.relicwrought.starter_training_sword": "Trainingsschwert",
   "item_base.relicwrought.starter_pickaxe": "Starter-Spitzhacke",
@@ -147,6 +147,19 @@
   "command.relicwrought.progression.level_set": "Stufe von %s auf %s gesetzt",
   "command.relicwrought.progression.disabled": "Charakterprogression ist in der Config deaktiviert",
   "command.relicwrought.progression.invalid_attribute": "Ungueltiges Attribut: %s",
-  "command.relicwrought.progression.attribute_added": "%s %s hinzugefuegt (gesamt: %s, %s Punkte uebrig)",
-  "progression.relicwrought.default_character_progression": "Standard-Charakterprogression"
+  "command.relicwrought.progression.attribute_added": "%s %s hinzugefügt (Gesamt: %s, %s Punkte übrig)",
+  "progression.relicwrought.default_character_progression": "Standard-Charakterfortschritt",
+  "command.relicwrought.combat.stats.header": "§6--- Kampfwerte ---",
+  "command.relicwrought.combat.stats.physical": "§ePhysischer Schaden: §f+%.1f%%",
+  "command.relicwrought.combat.stats.elemental": "§eElementarschaden: §f+%.1f%%",
+  "command.relicwrought.combat.stats.attack_speed": "§eAngriffsgeschwindigkeit: §f+%.1f%%",
+  "command.relicwrought.combat.stats.crit_chance": "§eKritische Trefferchance: §f%.1f%%",
+  "command.relicwrought.combat.stats.crit_multi": "§eKritischer Multiplikator: §f%.1f%%",
+  "command.relicwrought.combat.stats.armor": "§eRüstung: §f%.1f",
+  "command.relicwrought.combat.stats.fire_res": "§eFeuerwiderstand: §f%.1f%%",
+  "command.relicwrought.combat.stats.cold_res": "§eKältewiderstand: §f%.1f%%",
+  "command.relicwrought.combat.stats.lightning_res": "§eBlitzwiderstand: §f%.1f%%",
+  "command.relicwrought.combat.stats.poison_res": "§eGiftwiderstand: §f%.1f%%",
+  "command.relicwrought.combat.stats.movement": "§eBewegungsgeschwindigkeit: §f+%.1f%%",
+  "command.relicwrought.combat.stats.life": "§eMaximales Leben: §f+%.1f"
 }

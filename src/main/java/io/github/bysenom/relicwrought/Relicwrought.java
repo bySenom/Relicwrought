@@ -124,6 +124,14 @@ public final class Relicwrought implements ModInitializer {
                 var resourceManager = server.getResourceManager();
                 new RecipeRemovalHandler(config).filterRecipes(recipeManager, registryAccess, resourceManager);
             }
+            
+            if (config.enableArpgCombat() && progressionManager != null) {
+                ArpgItemStackService itemService = new ArpgItemStackService(List.of());
+                io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler damageHandler = 
+                    new io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler(config, itemService, progressionManager);
+                damageHandler.register();
+                LOGGER.info("Combat system initialized");
+            }
         });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -203,6 +211,7 @@ public final class Relicwrought implements ModInitializer {
             }
             if (progressionManager != null) {
                 ProgressionCommand.register(dispatcher, progressionManager, config);
+                io.github.bysenom.relicwrought.command.CombatCommand.register(dispatcher, progressionManager, config);
             }
         });
 
