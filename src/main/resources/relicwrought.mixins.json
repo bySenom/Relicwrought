@@ -10,8 +10,7 @@
     "client.LivingEntityClientMixin",
     "client.HudMixin",
     "client.MouseHandlerMixin",
-    "client.GuiMixin",
-    "client.EntityRendererMixin"
+    "client.GuiMixin"
   ],
   "injectors": {
     "defaultRequire": 1
