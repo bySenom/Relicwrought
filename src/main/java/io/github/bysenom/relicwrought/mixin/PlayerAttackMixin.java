@@ -29,24 +29,21 @@ public abstract class PlayerAttackMixin {
         CURRENT_TARGET.remove();
     }
 
-    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+    @Redirect(method = "attack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     private boolean redirectAttackHurt(Entity hurtTarget, DamageSource source, float vanillaDamage) {
         Player player = (Player) (Object) this;
         Entity mainTarget = CURRENT_TARGET.get();
 
         if (!(player instanceof ServerPlayer serverPlayer) || player.isSpectator()) {
-            hurtTarget.hurt(source, vanillaDamage);
-            return true;
+            return hurtTarget.hurtOrSimulate(source, vanillaDamage);
         }
 
         if (hurtTarget.isSpectator()) {
-            hurtTarget.hurt(source, vanillaDamage);
-            return true;
+            return hurtTarget.hurtOrSimulate(source, vanillaDamage);
         }
 
         if (APPLYING_ARPG_DAMAGE.get()) {
-            hurtTarget.hurt(source, vanillaDamage);
-            return true;
+            return hurtTarget.hurtOrSimulate(source, vanillaDamage);
         }
 
         // Only calculate if we are hitting the main target to avoid redundant calculations
@@ -69,17 +66,7 @@ public abstract class PlayerAttackMixin {
                 
                 APPLYING_ARPG_DAMAGE.set(true);
                 try {
-                    float healthBefore = 0;
-                    if (hurtTarget instanceof LivingEntity le) healthBefore = le.getHealth();
-                    
-                    hurtTarget.hurt(source, arpgDamage);
-                    
-                    boolean success = false;
-                    if (hurtTarget instanceof LivingEntity le) {
-                        success = le.getHealth() < healthBefore || !le.isAlive();
-                    } else {
-                        success = true;
-                    }
+                    boolean success = hurtTarget.hurtOrSimulate(source, arpgDamage);
                     
                     if (success && result.isCritical() && serverPlayer.level() != null && serverPlayer.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
                         serverLevel.sendParticles(
@@ -104,7 +91,6 @@ public abstract class PlayerAttackMixin {
         }
 
         // Fallback to Vanilla damage
-        hurtTarget.hurt(source, vanillaDamage);
-        return true;
+        return hurtTarget.hurtOrSimulate(source, vanillaDamage);
     }
 }
