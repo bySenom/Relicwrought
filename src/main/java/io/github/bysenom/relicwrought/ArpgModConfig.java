@@ -53,7 +53,8 @@ public record ArpgModConfig(
         double intelligenceElementalDamagePerPoint,
         double intelligenceResistancePerPoint,
         double vitalityLifePerPoint,
-        boolean useVanillaAttackCooldown
+        boolean useVanillaAttackCooldown,
+        boolean enableCombatDebugLogging
 ) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String CONFIG_FILE_NAME = "relicwrought.json";
@@ -102,7 +103,8 @@ public record ArpgModConfig(
                 0.002,  // intelligenceElementalDamagePerPoint (+1% per 5 INT = 0.002 per point)
                 0.002,  // intelligenceResistancePerPoint (+0.2% per INT = 0.002 per point)
                 5.0,    // vitalityLifePerPoint (+5 life per VIT)
-                true    // useVanillaAttackCooldown
+                true,   // useVanillaAttackCooldown
+                false   // enableCombatDebugLogging
         );
     }
 
@@ -181,7 +183,8 @@ public record ArpgModConfig(
                     config.strengthPhysicalDamagePerPoint(), config.strengthArmorPerPoint(),
                     config.dexterityAttackSpeedPerPoint(), config.dexterityCritChancePerPoint(),
                     config.intelligenceElementalDamagePerPoint(), config.intelligenceResistancePerPoint(),
-                    config.vitalityLifePerPoint(), config.useVanillaAttackCooldown()
+                    config.vitalityLifePerPoint(), config.useVanillaAttackCooldown(),
+                    config.enableCombatDebugLogging()
             );
             return save(configPath, validated, logger);
         }

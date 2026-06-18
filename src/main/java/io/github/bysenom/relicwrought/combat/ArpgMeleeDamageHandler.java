@@ -42,9 +42,15 @@ public final class ArpgMeleeDamageHandler {
         this.equippedResolver = new EquippedItemStatResolver(itemService);
     }
 
+    private static final ThreadLocal<Boolean> APPLYING_ARPG_DAMAGE = ThreadLocal.withInitial(() -> false);
+
     public void register() {
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             if (world.isClientSide()) {
+                return InteractionResult.PASS;
+            }
+
+            if (APPLYING_ARPG_DAMAGE.get()) {
                 return InteractionResult.PASS;
             }
 
@@ -56,8 +62,10 @@ public final class ArpgMeleeDamageHandler {
                 return InteractionResult.PASS;
             }
 
-            if (target instanceof Player && !config.enableArpgPvpDamage()) {
-                return InteractionResult.PASS;
+            if (target instanceof Player targetPlayer) {
+                if (!config.enableArpgPvpDamage()) {
+                    return InteractionResult.PASS;
+                }
             }
 
             ItemStack weapon = player.getMainHandItem();
@@ -116,17 +124,6 @@ public final class ArpgMeleeDamageHandler {
             
             DamageBundle weaponBundle = DamageBundle.single(DamageType.PHYSICAL, physRoll);
             
-            // Collect local elemental from weapon
-            double fireMin = 0, fireMax = 0;
-            double coldMin = 0, coldMax = 0;
-            double lightMin = 0, lightMax = 0;
-            double poisonMin = 0, poisonMax = 0;
-            
-            // Assuming LocalAffixResolver processed these into baseStats, but actually baseStats only has min/max damage which is physical in our model.
-            // For now, only physical is extracted from baseStats. If we need elemental from local affixes, we'd need to extract it. We'll stick to physical + global elemental for this iteration, as weapon elemental was complex.
-            
-            DamageBundle initialBundle = DamageBundle.single(DamageType.PHYSICAL, physRoll);
-
             // 4. Calculate
             boolean isBoss = target instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon || target instanceof net.minecraft.world.entity.boss.wither.WitherBoss;
             boolean isElite = false; // Add elite logic if present
@@ -148,9 +145,52 @@ public final class ArpgMeleeDamageHandler {
             if (result.success()) {
                 float damageAmount = (float) result.totalDamage();
                 
-                // Apply damage
-                DamageSource source = world.damageSources().playerAttack(player);
-                target.hurt(source, damageAmount);
+                APPLYING_ARPG_DAMAGE.set(true);
+                try {
+                    DamageSource source = world.damageSources().playerAttack(player);
+                    float healthBefore = target.getHealth();
+                    target.hurt(source, damageAmount);
+                    boolean hurtSuccess = target.getHealth() < healthBefore || !target.isAlive();
+                    
+                    if (hurtSuccess) {
+                        // Restore Vanilla Knockback
+                        int knockbackLevel = serverPlayer.isSprinting() ? 1 : 0;
+                        if (knockbackLevel > 0) {
+                            target.knockback(
+                                    (double)((float)knockbackLevel * 0.5F), 
+                                    (double)net.minecraft.util.Mth.sin(serverPlayer.getYRot() * ((float)Math.PI / 180F)), 
+                                    (double)(-net.minecraft.util.Mth.cos(serverPlayer.getYRot() * ((float)Math.PI / 180F))),
+                                    source,
+                                    damageAmount
+                            );
+                        }
+
+                        // Restore Fire Aspect is skipped for now due to API changes.
+                        
+                        // Restore Durability Loss
+                        weapon.hurtAndBreak(1, serverPlayer, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
+                        
+                        // Restore Exhaustion & Stats
+                        serverPlayer.causeFoodExhaustion(0.1F);
+                        serverPlayer.awardStat(net.minecraft.stats.Stats.DAMAGE_DEALT, Math.round(damageAmount * 10.0F));
+                        
+                        // Critical Particles
+                        if (result.isCritical() && world instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                            serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT, target.getX(), target.getY(0.5), target.getZ(), 10, 0.1, 0.1, 0.1, 0.2);
+                        }
+
+                        if (config.enableCombatDebugLogging()) {
+                            io.github.bysenom.relicwrought.Relicwrought.LOGGER.info(
+                                "ARPG Melee: Attacker={}, Target={}, RawDmg={}, Crit={}, CooldownScale={}, ArmorRed={}, FinalDmg={}",
+                                serverPlayer.getScoreboardName(), target.getName().getString(),
+                                result.rawDamage().getTotalDamage(), result.isCritical(), request.attackStrengthScale(),
+                                result.armorMitigationPercent(), result.totalDamage()
+                            );
+                        }
+                    }
+                } finally {
+                    APPLYING_ARPG_DAMAGE.set(false);
+                }
                 
                 // Reset vanilla cooldown
                 player.resetAttackStrengthTicker();
