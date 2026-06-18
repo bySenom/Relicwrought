@@ -1302,9 +1302,51 @@ Phase 6.
 - [x] Code compiliert und 302 Tests erfolgreich.
 - [ ] Manuelle Verifikation: Server/Client-Run ausstehend.
 
+## Phase 7 – Charakterlevel, Erfahrungspunkte und Attribute (abgeschlossen)
+
+### Ziele
+
+- Charakterlevel-System (Stufe 1–100) mit XP-Kurve (eigene ARPG-Stufen, kein Vanilla-XP).
+- Basis-Attribute (Stärke, Geschick, Intelligenz, Vitalität) mit Klassenstartwerten.
+- Attributpunkt-Vergabe beim Levelaufstieg (1 Punkt pro Stufe, serverautoritativ).
+- XP-Vergabe von Mob-Kills (feindliche Mobs, Bosse ×10).
+- Synchronisierung des Fortschritts zwischen Client und Server.
+- Befehle zum Verwalten von Stufen, XP und Attributen.
+
+### Umsetzung
+
+- `CharacterLevel` Value Object (1–100, validiert, clamped).
+- `CharacterAttribute` Enum (STRENGTH, DEXTERITY, INTELLIGENCE, VITALITY).
+- `CharacterProgression` Record (level, currentLevelXp, totalXp, unspentPoints, allocatedAttributes).
+- `ExperienceCurve` mit parametrisierter Potenzfunktion (`baseXp=100`, `exponent=1.65`).
+- `CharacterProgressionDefinition` + JSON-Reader aus `progression_profiles/`.
+- `ClassStartingAttributes` mit Klassenstandards (Krieger: 10/3/0/8, Waldläufer: 5/10/0/5, Arkanist: 2/2/12/4, Schurke: 3/8/2/5; Fallback 5/5/5/5).
+- `ExperienceRewardService`: `grantXp()`, `processLevelUps()`, `allocateAttribute()` mit Validierung.
+- `MobExperienceResolver`: Formel `maxHealth×2 + armor×5 + dimensionBonus`, Boss ×10, nur feindliche Entities.
+- PlayerArpgProfile v2: erweitert um `characterLevel`, `currentLevelXp`, `totalXp`, `unspentAttributePoints`, `allocatedAttributes`; Migration von v1→v2 mit leeren Defaults.
+- `PlayerProfileManager`: v2-Serialisierung mit dynamischem Deserialisierungs-Pfad.
+- `ProgressionManager`: Verknüpft Profil, Kurve, XP-Vergabe, Attributvergabe; berechnet Gesamtattribute.
+- `PlayerProgressionSyncPayload` (S2C): synchronisiert Level, XP, freie Punkte, allozierte + totale Werte.
+- `AttributeAllocationRequest` (C2S): Client fordert `attributeName` + `amount` an.
+- `ProgressionCommand`: `/relicwrought stats`, `/relicwrought xp give <player> <amount>`, `/relicwrought level inspect [player]`, `/relicwrought level set <player> <level>`, `/relicwrought attribute add <attribute> <amount>`.
+- Konfiguration (ArpgModConfig): 8 neue Felder (`enableCharacterProgression`, `maximumCharacterLevel`, `requirePlayerKillForXp`, `xpMultiplier`, `showXpGainMessages`, `showLevelUpMessages`, `attributePointsPerLevel`, `allowAdminLevelCommands`).
+- Deutsche und englische Lokalisierung für alle Befehle, Attributsnamen, Level-up-Meldungen.
+- Event-Handler für AFTER_DEATH (XP-Vergabe) und ServerPlayConnectionEvents.JOIN (Sync).
+- Data-Bootstrap lädt `progression_profiles/`-Definitionen.
+
+### Tests
+- 6 neue Testklassen: CharacterLevelTest (7), ExperienceCurveTest (9), ExperienceRewardServiceTest (6), CharacterProgressionDefinitionTest (5), CharacterProgressionDefinitionJsonReaderTest (7), ClassStartingAttributesTest (18).
+- 52 neue Tests.
+- 354 Tests insgesamt (+52 seit Phase 6.5).
+
+### Status
+
+- [x] Code compiliert und 354 Tests erfolgreich.
+- [ ] Manuelle Verifikation: Server/Client-Run ausstehend.
+
 ## Spätere Systeme
 
-- [ ] Charakterlevel.
+- [ ] Klassen-UI.
 - [ ] Klassen-UI.
 - [ ] Skilltree ähnlich Path of Exile.
 - [ ] aktive Fähigkeiten.
