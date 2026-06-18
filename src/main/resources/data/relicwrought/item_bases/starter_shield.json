@@ -1,0 +1,28 @@
+{
+  "id": "starter_shield",
+  "translation_key": "item_base.relicwrought.starter_shield",
+  "minecraft_item": "minecraft:shield",
+  "category": "shield",
+  "valid_slots": ["off_hand"],
+  "base_stats": {
+    "damage_min": 0.0,
+    "damage_max": 0.0,
+    "attack_speed": 0.0,
+    "armor": 5.0,
+    "durability": 100
+  },
+  "implicit_affixes": [],
+  "affix_tags": ["armor", "shield", "starter"],
+  "scaling_profile": "default_armor",
+  "scaling": {
+    "damage_profile": "weapon_damage_default",
+    "armor_profile": "armor_default",
+    "durability_profile": "armor_durability_default",
+    "minimum_damage_multiplier": 0.01,
+    "maximum_damage_multiplier": 0.01,
+    "armor_multiplier": 0.50,
+    "durability_multiplier": 0.50
+  },
+  "loot_sources": ["starter_kit"],
+  "data_version": 1
+}

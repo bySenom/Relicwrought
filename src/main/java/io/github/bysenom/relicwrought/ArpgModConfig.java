@@ -19,7 +19,15 @@ public record ArpgModConfig(
         boolean disableVanillaEquipmentRecipes,
         Set<String> disabledRecipeCategories,
         boolean enableDebugLootLogging,
-        int maximumArpgDropsPerSource
+        int maximumArpgDropsPerSource,
+        boolean enableClassSelection,
+        boolean showClassScreenOnFirstJoin,
+        boolean allowCommandClassSelection,
+        boolean grantStarterKit,
+        boolean autoEquipStarterArmor,
+        boolean dropStarterItemsWhenInventoryFull,
+        boolean allowAdminClassReset,
+        boolean disableVanillaEquipmentRecipesAfterSelection
 ) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String CONFIG_FILE_NAME = "relicwrought.json";
@@ -34,7 +42,15 @@ public record ArpgModConfig(
                 false,
                 new HashSet<>(),
                 false,
-                10
+                10,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
         );
     }
 
@@ -79,7 +95,11 @@ public record ArpgModConfig(
                     config.enableArpgMobDrops(), chance, config.requirePlayerKill(),
                     looting, config.keepVanillaEquipmentDrops(),
                     config.disableVanillaEquipmentRecipes(), categories,
-                    config.enableDebugLootLogging(), maxDrops
+                    config.enableDebugLootLogging(), maxDrops,
+                    config.enableClassSelection(), config.showClassScreenOnFirstJoin(),
+                    config.allowCommandClassSelection(), config.grantStarterKit(),
+                    config.autoEquipStarterArmor(), config.dropStarterItemsWhenInventoryFull(),
+                    config.allowAdminClassReset(), config.disableVanillaEquipmentRecipesAfterSelection()
             );
             return save(configPath, validated, logger);
         }

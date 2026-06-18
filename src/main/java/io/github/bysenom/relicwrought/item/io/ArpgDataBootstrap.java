@@ -14,6 +14,10 @@ import io.github.bysenom.relicwrought.item.registry.InMemoryDataRegistry;
 import io.github.bysenom.relicwrought.item.scaling.ScalingProfile;
 import io.github.bysenom.relicwrought.loot.LootProfileDefinition;
 import io.github.bysenom.relicwrought.loot.LootProfileDefinitionJsonReader;
+import io.github.bysenom.relicwrought.player.ClassDefinition;
+import io.github.bysenom.relicwrought.player.ClassDefinitionJsonReader;
+import io.github.bysenom.relicwrought.player.StarterKitDefinition;
+import io.github.bysenom.relicwrought.player.StarterKitDefinitionJsonReader;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -36,6 +40,8 @@ public final class ArpgDataBootstrap {
         InMemoryDataRegistry<ScalingProfile> scalingProfiles = new InMemoryDataRegistry<>();
         InMemoryDataRegistry<RarityDefinition> rarities = new InMemoryDataRegistry<>();
         InMemoryDataRegistry<LootProfileDefinition> lootProfiles = new InMemoryDataRegistry<>();
+        InMemoryDataRegistry<ClassDefinition> classes = new InMemoryDataRegistry<>();
+        InMemoryDataRegistry<StarterKitDefinition> starterKits = new InMemoryDataRegistry<>();
         List<String> errors = new ArrayList<>();
 
         loadIndexedDefinitions(modId, "scaling_profiles", new ScalingProfileJsonReader(), scalingProfiles, errors, logger);
@@ -44,8 +50,10 @@ public final class ArpgDataBootstrap {
         loadIndexedDefinitions(modId, "affixes", new AffixDefinitionJsonReader(), affixes, errors, logger);
         loadIndexedDefinitions(modId, "rarities", new RarityDefinitionJsonReader(), rarities, errors, logger);
         loadIndexedDefinitions(modId, "loot_profiles", new LootProfileDefinitionJsonReader(), lootProfiles, errors, logger);
+        loadIndexedDefinitions(modId, "classes", new ClassDefinitionJsonReader(), classes, errors, logger);
+        loadIndexedDefinitions(modId, "starter_kits", new StarterKitDefinitionJsonReader(), starterKits, errors, logger);
 
-        return new DefinitionLoadResult(itemBases, affixes, affixGroups, scalingProfiles, rarities, lootProfiles, errors);
+        return new DefinitionLoadResult(itemBases, affixes, affixGroups, scalingProfiles, rarities, lootProfiles, classes, starterKits, errors);
     }
 
     private static <T extends io.github.bysenom.relicwrought.item.model.KeyedDefinition> void loadIndexedDefinitions(

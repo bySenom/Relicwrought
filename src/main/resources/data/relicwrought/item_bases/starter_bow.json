@@ -1,0 +1,25 @@
+{
+  "id": "starter_bow",
+  "translation_key": "item_base.relicwrought.starter_bow",
+  "minecraft_item": "minecraft:bow",
+  "category": "bow",
+  "valid_slots": ["main_hand"],
+  "base_stats": {
+    "damage_min": 4.0,
+    "damage_max": 8.0,
+    "attack_speed": 1.0,
+    "durability": 100
+  },
+  "implicit_affixes": [],
+  "affix_tags": ["weapon", "ranged", "starter"],
+  "scaling_profile": "default_weapon",
+  "scaling": {
+    "damage_profile": "weapon_damage_default",
+    "durability_profile": "weapon_durability_default",
+    "minimum_damage_multiplier": 0.60,
+    "maximum_damage_multiplier": 0.80,
+    "durability_multiplier": 0.70
+  },
+  "loot_sources": ["starter_kit"],
+  "data_version": 1
+}

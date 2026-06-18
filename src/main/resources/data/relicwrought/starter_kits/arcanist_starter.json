@@ -1,0 +1,11 @@
+{
+  "id": "arcanist_starter",
+  "entries": [
+    { "item_base": "relicwrought:starter_staff", "item_level": 1, "quality": 0, "count": 1, "auto_equip": true, "slot": "mainhand" },
+    { "item_base": "relicwrought:scout_helmet", "item_level": 1, "quality": 0, "count": 1, "auto_equip": true, "slot": "head" },
+    { "item_base": "relicwrought:starter_pickaxe", "item_level": 1, "quality": 0, "count": 1, "auto_equip": false, "slot": "" },
+    { "item_base": "relicwrought:starter_axe", "item_level": 1, "quality": 0, "count": 1, "auto_equip": false, "slot": "" },
+    { "item_base": "relicwrought:starter_shovel", "item_level": 1, "quality": 0, "count": 1, "auto_equip": false, "slot": "" }
+  ],
+  "data_version": 1
+}

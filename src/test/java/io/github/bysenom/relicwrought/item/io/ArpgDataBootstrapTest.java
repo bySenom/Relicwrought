@@ -22,7 +22,7 @@ final class ArpgDataBootstrapTest {
         );
 
         assertTrue(result.errors().isEmpty(), () -> String.join("\n", result.errors()));
-        assertEquals(6, result.itemBases().size());
+        assertEquals(11, result.itemBases().size());
         assertEquals(25, result.affixes().size());
         assertEquals(23, result.affixGroups().size());
         assertEquals(8, result.scalingProfiles().size());
@@ -32,6 +32,10 @@ final class ArpgDataBootstrapTest {
         assertTrue(result.scalingProfiles().get(DefinitionKey.parse("weapon_damage_default", Relicwrought.MOD_ID)).isPresent());
         assertTrue(result.rarities().get(DefinitionKey.parse("common", Relicwrought.MOD_ID)).isPresent());
         assertTrue(result.rarities().get(DefinitionKey.parse("rare", Relicwrought.MOD_ID)).isPresent());
+        assertEquals(4, result.classes().size());
+        assertEquals(4, result.starterKits().size());
+        assertTrue(result.classes().get(DefinitionKey.parse("warrior", Relicwrought.MOD_ID)).isPresent());
+        assertTrue(result.starterKits().get(DefinitionKey.parse("warrior_starter", Relicwrought.MOD_ID)).isPresent());
     }
 
     @Test

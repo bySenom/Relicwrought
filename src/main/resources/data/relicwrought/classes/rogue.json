@@ -1,0 +1,9 @@
+{
+  "id": "rogue",
+  "display_name": "class.relicwrought.rogue",
+  "description": "class.relicwrought.rogue.description",
+  "starter_kit": "relicwrought:rogue_starter",
+  "sort_order": 3,
+  "enabled": true,
+  "data_version": 1
+}

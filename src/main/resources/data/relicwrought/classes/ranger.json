@@ -1,0 +1,9 @@
+{
+  "id": "ranger",
+  "display_name": "class.relicwrought.ranger",
+  "description": "class.relicwrought.ranger.description",
+  "starter_kit": "relicwrought:ranger_starter",
+  "sort_order": 1,
+  "enabled": true,
+  "data_version": 1
+}

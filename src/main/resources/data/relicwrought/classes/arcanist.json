@@ -1,0 +1,9 @@
+{
+  "id": "arcanist",
+  "display_name": "class.relicwrought.arcanist",
+  "description": "class.relicwrought.arcanist.description",
+  "starter_kit": "relicwrought:arcanist_starter",
+  "sort_order": 2,
+  "enabled": true,
+  "data_version": 1
+}

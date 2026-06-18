@@ -1,0 +1,13 @@
+{
+  "id": "warrior_starter",
+  "entries": [
+    { "item_base": "relicwrought:starter_training_sword", "item_level": 1, "quality": 0, "count": 1, "auto_equip": true, "slot": "mainhand" },
+    { "item_base": "relicwrought:starter_shield", "item_level": 1, "quality": 0, "count": 1, "auto_equip": true, "slot": "offhand" },
+    { "item_base": "relicwrought:scout_helmet", "item_level": 1, "quality": 0, "count": 1, "auto_equip": true, "slot": "head" },
+    { "item_base": "relicwrought:guard_chestplate", "item_level": 1, "quality": 0, "count": 1, "auto_equip": true, "slot": "chest" },
+    { "item_base": "relicwrought:starter_pickaxe", "item_level": 1, "quality": 0, "count": 1, "auto_equip": false, "slot": "" },
+    { "item_base": "relicwrought:starter_axe", "item_level": 1, "quality": 0, "count": 1, "auto_equip": false, "slot": "" },
+    { "item_base": "relicwrought:starter_shovel", "item_level": 1, "quality": 0, "count": 1, "auto_equip": false, "slot": "" }
+  ],
+  "data_version": 1
+}

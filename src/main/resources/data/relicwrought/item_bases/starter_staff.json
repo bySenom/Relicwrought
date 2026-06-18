@@ -1,0 +1,25 @@
+{
+  "id": "starter_staff",
+  "translation_key": "item_base.relicwrought.starter_staff",
+  "minecraft_item": "minecraft:wooden_sword",
+  "category": "sword",
+  "valid_slots": ["main_hand"],
+  "base_stats": {
+    "damage_min": 2.0,
+    "damage_max": 4.0,
+    "attack_speed": 0.9,
+    "durability": 60
+  },
+  "implicit_affixes": [],
+  "affix_tags": ["weapon", "melee", "starter"],
+  "scaling_profile": "default_weapon",
+  "scaling": {
+    "damage_profile": "weapon_damage_default",
+    "durability_profile": "weapon_durability_default",
+    "minimum_damage_multiplier": 0.40,
+    "maximum_damage_multiplier": 0.60,
+    "durability_multiplier": 0.60
+  },
+  "loot_sources": ["starter_kit"],
+  "data_version": 1
+}

@@ -1,6 +1,11 @@
 [
   "starter_training_sword.json",
   "starter_pickaxe.json",
+  "starter_axe.json",
+  "starter_bow.json",
+  "starter_dagger.json",
+  "starter_shield.json",
+  "starter_staff.json",
   "iron_war_axe.json",
   "scout_helmet.json",
   "guard_chestplate.json",

@@ -1,0 +1,9 @@
+{
+  "id": "warrior",
+  "display_name": "class.relicwrought.warrior",
+  "description": "class.relicwrought.warrior.description",
+  "starter_kit": "relicwrought:warrior_starter",
+  "sort_order": 0,
+  "enabled": true,
+  "data_version": 1
+}
