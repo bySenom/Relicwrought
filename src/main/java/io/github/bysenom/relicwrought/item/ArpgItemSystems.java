@@ -30,4 +30,8 @@ public final class ArpgItemSystems {
     public static DefinitionLoadResult bootstrapResult() {
         return bootstrapResult;
     }
+
+    public static io.github.bysenom.relicwrought.item.persistence.ArpgItemStackService itemStackService() {
+        return new io.github.bysenom.relicwrought.item.persistence.ArpgItemStackService(java.util.List.of());
+    }
 }

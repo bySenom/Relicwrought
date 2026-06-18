@@ -5,6 +5,11 @@
   "mixins": [
     "PlayerAttackMixin"
   ],
+  "client": [
+    "client.MinecraftMixin",
+    "client.LivingEntityClientMixin",
+    "client.HudMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

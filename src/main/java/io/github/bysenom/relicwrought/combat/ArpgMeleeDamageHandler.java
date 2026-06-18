@@ -33,6 +33,8 @@ public final class ArpgMeleeDamageHandler {
     private final ProgressionManager progressionManager;
     private final DamagePipeline pipeline;
     private final EquippedItemStatResolver equippedResolver;
+    private final io.github.bysenom.relicwrought.combat.cooldown.WeaponCooldownResolver cooldownResolver;
+    private final io.github.bysenom.relicwrought.combat.cooldown.WeaponAttackManager cooldownManager;
 
     public ArpgMeleeDamageHandler(ArpgModConfig config, ArpgItemStackService itemService, ProgressionManager progressionManager) {
         this.config = config;
@@ -40,6 +42,24 @@ public final class ArpgMeleeDamageHandler {
         this.progressionManager = progressionManager;
         this.pipeline = new DamagePipeline(config);
         this.equippedResolver = new EquippedItemStatResolver(itemService);
+        this.cooldownResolver = new io.github.bysenom.relicwrought.combat.cooldown.WeaponCooldownResolver(config, this::getAttackerStats);
+        this.cooldownManager = new io.github.bysenom.relicwrought.combat.cooldown.WeaponAttackManager();
+    }
+    
+    public io.github.bysenom.relicwrought.combat.cooldown.WeaponCooldownResolver getCooldownResolver() { return cooldownResolver; }
+    public io.github.bysenom.relicwrought.combat.cooldown.WeaponAttackManager getCooldownManager() { return cooldownManager; }
+
+    public CharacterCombatStats getAttackerStats(net.minecraft.world.entity.player.Player player) {
+        if (!(player instanceof net.minecraft.server.level.ServerPlayer serverPlayer)) {
+            return CharacterCombatStats.empty();
+        }
+        io.github.bysenom.relicwrought.progression.CharacterProgression progression = progressionManager != null 
+                ? progressionManager.getProgression(serverPlayer) : null;
+        CharacterCombatStats baseStats = progression != null 
+                ? io.github.bysenom.relicwrought.combat.stats.AttributeCombatResolver.resolve(progressionManager.getTotalAttributes(serverPlayer), config)
+                : CharacterCombatStats.empty();
+        CharacterCombatStats equippedStats = equippedResolver.collectGlobalStats(serverPlayer);
+        return io.github.bysenom.relicwrought.combat.stats.CharacterCombatStatResolver.combine(baseStats, equippedStats);
     }
 
     private static final ThreadLocal<Boolean> APPLYING_ARPG_DAMAGE = ThreadLocal.withInitial(() -> false);
@@ -71,12 +91,7 @@ public final class ArpgMeleeDamageHandler {
         CharacterProgression progression = progressionManager.getProgression(attacker);
         int level = progression != null ? progression.level().value() : 1;
         
-        CharacterCombatStats baseStats = progression != null 
-                ? AttributeCombatResolver.resolve(progression.allocatedAttributes(), config)
-                : CharacterCombatStats.empty();
-                
-        CharacterCombatStats equippedStats = equippedResolver.collectGlobalStats(attacker);
-        CharacterCombatStats attackerStats = CharacterCombatStatResolver.combine(baseStats, equippedStats);
+        CharacterCombatStats attackerStats = getAttackerStats(attacker);
 
         // 2. Resolve Target Stats
         CharacterCombatStats targetStats;

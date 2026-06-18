@@ -54,7 +54,25 @@ public record ArpgModConfig(
         double intelligenceResistancePerPoint,
         double vitalityLifePerPoint,
         boolean useVanillaAttackCooldown,
-        boolean enableCombatDebugLogging
+        boolean enableCombatDebugLogging,
+        
+        // Cooldown Server Config
+        boolean enableWeaponCooldownGating,
+        double minimumAttackSpeed,
+        double maximumAttackSpeed,
+        int minimumWeaponCooldownTicks,
+        boolean resetCooldownOnWeaponSwitch,
+        
+        // Cooldown Client Config
+        boolean showWeaponCooldown,
+        boolean hideVanillaAttackIndicatorForArpgWeapons,
+        String weaponCooldownPosition,
+        int weaponCooldownOffsetX,
+        int weaponCooldownOffsetY,
+        int weaponCooldownWidth,
+        int weaponCooldownHeight,
+        boolean weaponCooldownShowReadyFlash,
+        boolean weaponCooldownShowPercentage
 ) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String CONFIG_FILE_NAME = "relicwrought.json";
@@ -104,7 +122,23 @@ public record ArpgModConfig(
                 0.002,  // intelligenceResistancePerPoint (+0.2% per INT = 0.002 per point)
                 5.0,    // vitalityLifePerPoint (+5 life per VIT)
                 true,   // useVanillaAttackCooldown
-                false   // enableCombatDebugLogging
+                false,  // enableCombatDebugLogging
+                
+                true,   // enableWeaponCooldownGating
+                0.2,    // minimumAttackSpeed
+                10.0,   // maximumAttackSpeed
+                2,      // minimumWeaponCooldownTicks
+                true,   // resetCooldownOnWeaponSwitch
+                
+                true,   // showWeaponCooldown
+                true,   // hideVanillaAttackIndicatorForArpgWeapons
+                "HOTBAR_CENTER", // weaponCooldownPosition
+                0,      // weaponCooldownOffsetX
+                -20,    // weaponCooldownOffsetY
+                100,    // weaponCooldownWidth
+                4,      // weaponCooldownHeight
+                true,   // weaponCooldownShowReadyFlash
+                false   // weaponCooldownShowPercentage
         );
     }
 
@@ -184,7 +218,15 @@ public record ArpgModConfig(
                     config.dexterityAttackSpeedPerPoint(), config.dexterityCritChancePerPoint(),
                     config.intelligenceElementalDamagePerPoint(), config.intelligenceResistancePerPoint(),
                     config.vitalityLifePerPoint(), config.useVanillaAttackCooldown(),
-                    config.enableCombatDebugLogging()
+                    config.enableCombatDebugLogging(),
+                    config.enableWeaponCooldownGating(),
+                    config.minimumAttackSpeed(), config.maximumAttackSpeed(),
+                    config.minimumWeaponCooldownTicks(), config.resetCooldownOnWeaponSwitch(),
+                    config.showWeaponCooldown(), config.hideVanillaAttackIndicatorForArpgWeapons(),
+                    config.weaponCooldownPosition(), config.weaponCooldownOffsetX(),
+                    config.weaponCooldownOffsetY(), config.weaponCooldownWidth(),
+                    config.weaponCooldownHeight(), config.weaponCooldownShowReadyFlash(),
+                    config.weaponCooldownShowPercentage()
             );
             return save(configPath, validated, logger);
         }

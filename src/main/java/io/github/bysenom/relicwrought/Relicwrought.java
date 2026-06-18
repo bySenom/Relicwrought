@@ -62,6 +62,7 @@ public final class Relicwrought implements ModInitializer {
         ClassSelectionNetworking.registerS2CPayloads();
         PayloadTypeRegistry.clientboundPlay().register(PlayerProgressionSyncPayload.TYPE, PlayerProgressionSyncPayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(AttributeAllocationRequest.TYPE, AttributeAllocationRequest.STREAM_CODEC);
+        io.github.bysenom.relicwrought.network.WeaponCooldownNetworking.registerPayloads();
         ArpgItemSystems.initialize();
 
         DefinitionLoadResult definitions = ArpgItemSystems.bootstrapResult();
@@ -136,6 +137,31 @@ public final class Relicwrought implements ModInitializer {
                     new io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler(config, itemService, progressionManager);
                 meleeDamageHandler.register();
                 LOGGER.info("Combat system initialized");
+                
+                net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(srv -> {
+                    if (!config.enableWeaponCooldownGating()) return;
+                    for (ServerPlayer player : srv.getPlayerList().getPlayers()) {
+                        io.github.bysenom.relicwrought.combat.cooldown.WeaponAttackState state = meleeDamageHandler.getCooldownManager().getState(player);
+                        io.github.bysenom.relicwrought.item.model.ArpgItemData weaponData = null;
+                        net.minecraft.world.item.ItemStack mainHand = player.getMainHandItem();
+                        if (itemService.hasArpgData(mainHand)) {
+                            weaponData = itemService.read(mainHand).data().orElse(null);
+                        }
+                        
+                        java.util.UUID weaponUuid = weaponData != null ? weaponData.itemId() : null;
+                        long currentTick = srv.getTickCount();
+                        
+                        if (state.checkWeaponSwap(currentTick, weaponUuid)) {
+                            if (config.resetCooldownOnWeaponSwitch() && weaponUuid != null) {
+                                state.resetCooldown(currentTick);
+                                int cooldownDuration = meleeDamageHandler.getCooldownResolver().resolveCooldownTicks(player, weaponData);
+                                double aps = meleeDamageHandler.getCooldownResolver().resolveAttackSpeed(player, weaponData);
+                                state.update(currentTick, cooldownDuration, aps);
+                                io.github.bysenom.relicwrought.network.WeaponCooldownNetworking.sendSync(player, state, true);
+                            }
+                        }
+                    }
+                });
             }
         });
 

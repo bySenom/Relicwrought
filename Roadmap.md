@@ -1344,6 +1344,36 @@ Phase 6.
 - [x] Code compiliert und 354 Tests erfolgreich.
 - [ ] Manuelle Verifikation: Server/Client-Run ausstehend.
 
+## Phase 8.5 – Weapon Cooldown und Angriffsanimation
+
+### Ziel
+
+Ein konsistentes visuelles und spielmechanisches Weapon-Cooldown-System, das den Vanilla-Angriffsindikator für ARPG-Waffen ersetzt und serverautoritär validiert.
+
+### Aufgaben
+
+- [ ] aktuelle Vanilla-Angriffsanzeige analysieren
+- [ ] WeaponCooldownResolver implementieren
+- [ ] WeaponAttackState implementieren
+- [ ] serverseitiges Cooldown-Gating implementieren
+- [ ] clientseitige Vorhersage implementieren
+- [ ] Cooldown-Synchronisierung implementieren
+- [ ] ARPG-Angriffe vor Cooldownende blockieren
+- [ ] falsche Swing-Animation bei abgelehntem Angriff verhindern
+- [ ] Swing-Dauer an Angriffsgeschwindigkeit koppeln
+- [ ] Animationsprofile vorbereiten
+- [ ] eigenen Cooldown-Balken rendern
+- [ ] Vanilla-Indikator für ARPG-Waffen ausblenden
+- [ ] Cooldown mit dualen Hotbars integrieren
+- [ ] Waffenwechselregel implementieren
+- [ ] Cooldown-Konfiguration ergänzen
+- [ ] Unit-Tests ergänzen
+- [ ] manuellen Cooldown-Test durchführen
+
+### Status
+
+- [ ] In Planung
+
 ## Spätere Systeme
 
 - [ ] Klassen-UI.

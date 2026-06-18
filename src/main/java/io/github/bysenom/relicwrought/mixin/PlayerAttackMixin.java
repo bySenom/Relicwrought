@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Player.class)
 public abstract class PlayerAttackMixin {
@@ -27,6 +28,25 @@ public abstract class PlayerAttackMixin {
     @Inject(method = "attack", at = @At("RETURN"))
     private void onAttackEnd(Entity target, CallbackInfo ci) {
         CURRENT_TARGET.remove();
+    }
+
+    @Inject(method = "getAttackStrengthScale", at = @At("HEAD"), cancellable = true)
+    private void hideVanillaAttackIndicator(float adjustTicks, CallbackInfoReturnable<Float> cir) {
+        Player player = (Player) (Object) this;
+        io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler handler = Relicwrought.getMeleeDamageHandler();
+        if (handler != null && handler.getConfig().enableWeaponCooldownGating()) {
+            if (player.level().isClientSide()) {
+                if (handler.getConfig().hideVanillaAttackIndicatorForArpgWeapons()) {
+                    if (io.github.bysenom.relicwrought.item.ArpgItemSystems.itemStackService().hasArpgData(player.getMainHandItem())) {
+                        cir.setReturnValue(1.0f); // Forces vanilla indicator to hide
+                    }
+                }
+            } else {
+                if (io.github.bysenom.relicwrought.item.ArpgItemSystems.itemStackService().hasArpgData(player.getMainHandItem())) {
+                    cir.setReturnValue(1.0f); // Ensures server damage calculations don't use vanilla cooldown
+                }
+            }
+        }
     }
 
     private static final java.util.concurrent.atomic.AtomicBoolean MISSING_HANDLER_WARNING_LOGGED = new java.util.concurrent.atomic.AtomicBoolean();
@@ -59,6 +79,20 @@ public abstract class PlayerAttackMixin {
 
         if (!handler.getConfig().enableArpgCombat()) {
             return hurtTarget.hurtOrSimulate(source, vanillaDamage);
+        }
+
+        io.github.bysenom.relicwrought.item.model.ArpgItemData weaponData = null;
+        if (io.github.bysenom.relicwrought.item.ArpgItemSystems.itemStackService().hasArpgData(serverPlayer.getMainHandItem())) {
+            weaponData = io.github.bysenom.relicwrought.item.ArpgItemSystems.itemStackService().read(serverPlayer.getMainHandItem()).data().orElse(null);
+        }
+        boolean isArpgWeapon = weaponData != null;
+
+        if (isArpgWeapon && handler.getConfig().enableWeaponCooldownGating()) {
+            long currentTick = serverPlayer.level().getGameTime();
+            io.github.bysenom.relicwrought.combat.cooldown.WeaponAttackState state = handler.getCooldownManager().getState(serverPlayer);
+            if (!state.isReady(currentTick)) {
+                return false;
+            }
         }
 
         // Only calculate if we are hitting the main target to avoid redundant calculations
@@ -101,6 +135,18 @@ public abstract class PlayerAttackMixin {
                         result.rawDamage().getTotalDamage(), result.isCritical(), result.totalDamage()
                     );
                 }
+                
+                if (success && isArpgWeapon && handler.getConfig().enableWeaponCooldownGating()) {
+                    long currentTick = serverPlayer.level().getGameTime();
+                    double aps = handler.getCooldownResolver().resolveAttackSpeed(serverPlayer, weaponData);
+                    int cooldownDuration = handler.getCooldownResolver().resolveCooldownTicks(serverPlayer, weaponData);
+                    
+                    io.github.bysenom.relicwrought.combat.cooldown.WeaponAttackState state = handler.getCooldownManager().getState(serverPlayer);
+                    state.recordAttack(currentTick, cooldownDuration, aps);
+                    
+                    io.github.bysenom.relicwrought.network.WeaponCooldownNetworking.sendSync(serverPlayer, state, true);
+                }
+                
                 return success;
             } finally {
                 APPLYING_ARPG_DAMAGE.set(false);
