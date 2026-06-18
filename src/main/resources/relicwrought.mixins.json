@@ -9,7 +9,7 @@
     "client.MinecraftMixin",
     "client.LivingEntityClientMixin",
     "client.HudMixin",
-    "client.GuiMixin"
+    "client.VanillaHudSuppressionMixin"
   ],
   "injectors": {
     "defaultRequire": 1
