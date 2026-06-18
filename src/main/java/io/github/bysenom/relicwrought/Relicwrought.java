@@ -45,6 +45,11 @@ public final class Relicwrought implements ModInitializer {
     private static ClassSelectionManager selectionManager;
     private static ProgressionManager progressionManager;
     private static MobExperienceResolver mobXpResolver;
+    private static io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler meleeDamageHandler;
+
+    public static io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler getMeleeDamageHandler() {
+        return meleeDamageHandler;
+    }
 
     @Override
     public void onInitialize() {
@@ -127,9 +132,9 @@ public final class Relicwrought implements ModInitializer {
             
             if (config.enableArpgCombat() && progressionManager != null) {
                 ArpgItemStackService itemService = new ArpgItemStackService(List.of());
-                io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler damageHandler = 
+                meleeDamageHandler = 
                     new io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler(config, itemService, progressionManager);
-                damageHandler.register();
+                meleeDamageHandler.register();
                 LOGGER.info("Combat system initialized");
             }
         });

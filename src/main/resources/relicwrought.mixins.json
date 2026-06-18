@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "io.github.bysenom.relicwrought.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "PlayerAttackMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
