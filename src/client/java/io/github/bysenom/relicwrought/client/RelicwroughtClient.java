@@ -22,5 +22,40 @@ public class RelicwroughtClient implements ClientModInitializer {
             });
         });
 
+        ClientPlayNetworking.registerGlobalReceiver(io.github.bysenom.relicwrought.network.PlayerProgressionSyncPayload.TYPE, (payload, context) -> {
+            context.client().execute(() -> {
+                io.github.bysenom.relicwrought.client.ClientArpgState.getCharacterScreenModel().updateProgression(
+                        payload.characterLevel(), payload.currentLevelXp(), payload.xpForNextLevel(),
+                        payload.totalXp(), payload.unspentAttributePoints(), payload.allocatedAttributes(),
+                        payload.totalAttributes()
+                );
+            });
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(io.github.bysenom.relicwrought.network.PlayerHudSyncPayload.TYPE, (payload, context) -> {
+            context.client().execute(() -> {
+                io.github.bysenom.relicwrought.client.ClientArpgState.updateHud(
+                        payload.currentHealth(), payload.maximumHealth(), payload.resourceState()
+                );
+            });
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(io.github.bysenom.relicwrought.network.FloatingDamageNumberPayload.TYPE, (payload, context) -> {
+            context.client().execute(() -> {
+                io.github.bysenom.relicwrought.client.combattext.FloatingDamageNumberManager.addEvent(payload.event());
+            });
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(io.github.bysenom.relicwrought.network.EnemyUiSyncPayload.TYPE, (payload, context) -> {
+            context.client().execute(() -> {
+                if (context.client().level != null) {
+                    io.github.bysenom.relicwrought.client.enemy.EnemyUiTracker.updateSnapshot(
+                            payload.snapshot(), context.client().level.getGameTime()
+                    );
+                }
+            });
+        });
+
+        io.github.bysenom.relicwrought.client.KeyBindingRegistry.register();
     }
 }

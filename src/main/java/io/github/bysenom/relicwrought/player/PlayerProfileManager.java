@@ -89,15 +89,15 @@ public final class PlayerProfileManager {
         int starterKitVersion = getInt(data, "starterKitVersion", 0);
         long selectionTimestamp = getLong(data, "selectionTimestamp", 0L);
 
-        if (dataVersion < PlayerArpgProfile.CURRENT_VERSION) {
-            Relicwrought.LOGGER.info("Migrating player profile v{} -> v{}", dataVersion, PlayerArpgProfile.CURRENT_VERSION);
+        if (dataVersion < 2) {
+            Relicwrought.LOGGER.info("Migrating player profile v{} -> v{}", dataVersion, 2);
             PlayerArpgProfile v1 = new PlayerArpgProfile(
                     dataVersion, classSelected, classId, starterKitGranted,
                     starterKitId, starterKitVersion, selectionTimestamp,
                     io.github.bysenom.relicwrought.progression.CharacterLevel.MIN,
-                    0L, 0L, 0, PlayerArpgProfile.emptyAttributes()
+                    0L, 0L, 0, PlayerArpgProfile.emptyAttributes(), 0.0
             );
-            return PlayerArpgProfile.legacyV1ToV2(v1);
+            return PlayerArpgProfile.legacyV2ToV3(PlayerArpgProfile.legacyV1ToV2(v1));
         }
 
         int characterLevel = getInt(data, "characterLevel", io.github.bysenom.relicwrought.progression.CharacterLevel.MIN);
@@ -123,13 +123,25 @@ public final class PlayerProfileManager {
             }
             allocated = Collections.unmodifiableMap(attrs);
         }
+        
+        if (dataVersion < 3) {
+            Relicwrought.LOGGER.info("Migrating player profile v{} -> v{}", dataVersion, 3);
+            PlayerArpgProfile v2 = new PlayerArpgProfile(
+                    dataVersion, classSelected, classId, starterKitGranted,
+                    starterKitId, starterKitVersion, selectionTimestamp,
+                    characterLevel, currentLevelXp, totalXp, unspentAttributePoints, allocated, 0.0
+            );
+            return PlayerArpgProfile.legacyV2ToV3(v2);
+        }
+        
+        double currentResourceValue = getDouble(data, "currentResourceValue", 0.0);
 
         return new PlayerArpgProfile(
                 PlayerArpgProfile.CURRENT_VERSION,
                 classSelected, classId, starterKitGranted,
                 starterKitId, starterKitVersion, selectionTimestamp,
                 characterLevel, currentLevelXp, totalXp,
-                unspentAttributePoints, allocated
+                unspentAttributePoints, allocated, currentResourceValue
         );
     }
 
@@ -159,6 +171,7 @@ public final class PlayerProfileManager {
                     }
                 }
                 data.put("allocatedAttributes", attrs);
+                data.put("currentResourceValue", p.currentResourceValue());
 
                 raw.put(entry.getKey().toString(), data);
             }
@@ -183,6 +196,12 @@ public final class PlayerProfileManager {
     private static long getLong(Map<String, Object> map, String key, long def) {
         Object v = map.get(key);
         if (v instanceof Number n) return n.longValue();
+        return def;
+    }
+    
+    private static double getDouble(Map<String, Object> map, String key, double def) {
+        Object v = map.get(key);
+        if (v instanceof Number n) return n.doubleValue();
         return def;
     }
 

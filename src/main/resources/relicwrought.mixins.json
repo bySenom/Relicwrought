@@ -8,7 +8,10 @@
   "client": [
     "client.MinecraftMixin",
     "client.LivingEntityClientMixin",
-    "client.HudMixin"
+    "client.HudMixin",
+    "client.MouseHandlerMixin",
+    "client.GuiMixin",
+    "client.EntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

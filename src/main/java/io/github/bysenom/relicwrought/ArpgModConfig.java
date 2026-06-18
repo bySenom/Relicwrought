@@ -72,7 +72,14 @@ public record ArpgModConfig(
         int weaponCooldownWidth,
         int weaponCooldownHeight,
         boolean weaponCooldownShowReadyFlash,
-        boolean weaponCooldownShowPercentage
+        boolean weaponCooldownShowPercentage,
+        
+        // Phase 8.5 UI Config
+        boolean enableRelicwroughtHud,
+        boolean hideVanillaHearts,
+        boolean hideVanillaArmor,
+        boolean enableCombatText,
+        boolean enableEnemyNameplates
 ) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String CONFIG_FILE_NAME = "relicwrought.json";
@@ -138,7 +145,13 @@ public record ArpgModConfig(
                 100,    // weaponCooldownWidth
                 4,      // weaponCooldownHeight
                 true,   // weaponCooldownShowReadyFlash
-                false   // weaponCooldownShowPercentage
+                false,  // weaponCooldownShowPercentage
+                
+                true,   // enableRelicwroughtHud
+                true,   // hideVanillaHearts
+                true,   // hideVanillaArmor
+                true,   // enableCombatText
+                true    // enableEnemyNameplates
         );
     }
 
@@ -226,7 +239,10 @@ public record ArpgModConfig(
                     config.weaponCooldownPosition(), config.weaponCooldownOffsetX(),
                     config.weaponCooldownOffsetY(), config.weaponCooldownWidth(),
                     config.weaponCooldownHeight(), config.weaponCooldownShowReadyFlash(),
-                    config.weaponCooldownShowPercentage()
+                    config.weaponCooldownShowPercentage(),
+                    config.enableRelicwroughtHud(), config.hideVanillaHearts(),
+                    config.hideVanillaArmor(), config.enableCombatText(),
+                    config.enableEnemyNameplates()
             );
             return save(configPath, validated, logger);
         }

@@ -146,6 +146,49 @@ public abstract class PlayerAttackMixin {
                     
                     io.github.bysenom.relicwrought.network.WeaponCooldownNetworking.sendSync(serverPlayer, state, true);
                 }
+
+                if (success) {
+                    // Dispatch Floating Damage Number
+                    io.github.bysenom.relicwrought.combat.damage.CombatTextEvent textEvent = new io.github.bysenom.relicwrought.combat.damage.CombatTextEvent(
+                            hurtTarget.getId(),
+                            hurtTarget.getUUID(),
+                            serverPlayer.getUUID(),
+                            result.totalDamage(),
+                            result.isCritical(),
+                            "physical",
+                            serverPlayer.level().getRandom().nextLong(),
+                            serverPlayer.level().getGameTime()
+                    );
+                    net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(
+                            serverPlayer,
+                            new io.github.bysenom.relicwrought.network.FloatingDamageNumberPayload(textEvent)
+                    );
+
+                    // Dispatch Enemy UI Sync
+                    if (hurtTarget instanceof LivingEntity living) {
+                        io.github.bysenom.relicwrought.ui.EnemyClassification classification = io.github.bysenom.relicwrought.ui.EnemyClassification.NORMAL;
+                        if (living instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon || living instanceof net.minecraft.world.entity.boss.wither.WitherBoss) {
+                            classification = io.github.bysenom.relicwrought.ui.EnemyClassification.BOSS;
+                        }
+
+                        io.github.bysenom.relicwrought.ui.EnemyUiSnapshot snapshot = new io.github.bysenom.relicwrought.ui.EnemyUiSnapshot(
+                                living.getId(),
+                                living.getUUID(),
+                                living.getName().getString(),
+                                classification,
+                                1, // level placeholder
+                                living.getHealth(),
+                                living.getMaxHealth(),
+                                living instanceof net.minecraft.world.entity.Mob, // hostile
+                                classification == io.github.bysenom.relicwrought.ui.EnemyClassification.BOSS,
+                                0
+                        );
+                        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(
+                                serverPlayer,
+                                new io.github.bysenom.relicwrought.network.EnemyUiSyncPayload(snapshot)
+                        );
+                    }
+                }
                 
                 return success;
             } finally {

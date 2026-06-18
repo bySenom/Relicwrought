@@ -1344,7 +1344,108 @@ Phase 6.
 - [x] Code compiliert und 354 Tests erfolgreich.
 - [ ] Manuelle Verifikation: Server/Client-Run ausstehend.
 
-## Phase 8.5 – Weapon Cooldown und Angriffsanimation
+## Phase 8.5 – Charakterfenster, HUD, duale Hotbars und Combat-Feedback
+
+### Ziel
+Eine neue Benutzeroberfläche, eine saubere Eingabearchitektur für spätere Fähigkeiten und eine übersichtliche Darstellung von Gegnerinformationen und Kampfschaden.
+
+### UI-Architektur
+Klar getrennte Common- und Clientpakete für UI-Modelle, Controller und Rendering.
+
+### Charakterfenster
+Ein eigenes Relicwrought-Charakterfenster (Standardtaste 'C') zur Anzeige von Level, XP, Attributen und Combat-Stats.
+
+### Spieler-HP-Balken
+Ersatz der Vanilla-Herzen durch einen ARPG-HP-Balken.
+
+### Klassenressourcen
+Klassenspezifische Ressourcen (Mana, Rage, Energy) anstelle der Vanilla-Rüstungsanzeige.
+
+### Duale Hotbars
+Umschaltbare Item- und Ability-Hotbars über die Taste 'R'.
+
+### Eingabesteuerung
+Tasten 1–9 wirken ausschließlich auf die aktive Hotbar. Vanilla-Itemwechsel wird im Ability-Modus blockiert.
+
+### Floating Damage Numbers
+Schwebende Schadenszahlen über getroffenen Gegnern, differenziert nach Schadensart und Krit.
+
+### Gegner-Nameplates
+Eigene Nameplates über relevanten Gegnern mit Level und Klassifikation.
+
+### Gegner-HP-Balken
+Genau ein sichtbarer Gegner-HP-Balken innerhalb der Nameplate.
+
+### Netzwerkstrategie
+Serverseitige Autorität über HP, Ressourcen, Stats und Ability-Slots. Event-basierte Sync-Payloads.
+
+### Aufgaben
+
+- [ ] HUD- und Input-APIs analysieren
+- [ ] World-Space-Rendering-API analysieren
+- [ ] CharacterScreenModel implementieren
+- [ ] CharacterScreen implementieren
+- [ ] Charakterfenster-Keybinding implementieren
+- [ ] Spieler-HP-Balken implementieren
+- [ ] Vanilla-Herzen ausblenden
+- [ ] CharacterResourceType implementieren
+- [ ] CharacterResourceState implementieren
+- [ ] Ressourcenpersistenz implementieren
+- [ ] Ressourcen-Sync implementieren
+- [ ] Ressourcenleiste implementieren
+- [ ] Vanilla-Rüstung ausblenden
+- [ ] HotbarMode implementieren
+- [ ] AbilityHotbarState implementieren
+- [ ] neun Ability-Slots implementieren
+- [ ] Hotbar-Keybinding implementieren
+- [ ] beide Hotbars rendern
+- [ ] aktive Hotbar hervorheben
+- [ ] inaktive Hotbar abdunkeln
+- [ ] Zahlentasten kontextabhängig routen
+- [ ] Vanilla-Itemwechsel im Ability-Modus blockieren
+- [ ] Ability-Aktivierung im Item-Modus blockieren
+- [ ] AbilitySlotInputPayload implementieren
+- [ ] CombatTextEvent implementieren
+- [ ] FloatingDamageNumberPayload implementieren
+- [ ] FloatingDamageNumberManager implementieren
+- [ ] Damage Numbers rendern
+- [ ] Kritdarstellung implementieren
+- [ ] Damage-Number-Merge implementieren
+- [ ] EnemyClassification implementieren
+- [ ] EnemyUiSnapshot implementieren
+- [ ] EnemyUiSyncPayload implementieren
+- [ ] EnemyUiTracker implementieren
+- [ ] Gegner-Nameplates rendern
+- [ ] Gegner-HP-Balken rendern
+- [ ] doppelte Vanilla-Nameplates verhindern
+- [ ] Sichtbarkeits- und Distanzregeln implementieren
+- [ ] HUD-Konfiguration ergänzen
+- [ ] deutsche Übersetzungen ergänzen
+- [ ] englische Übersetzungen ergänzen
+- [ ] Unit-Tests ergänzen
+- [ ] Integrationstest ergänzen
+- [ ] manuellen Test dokumentieren
+- [ ] compileJava ausführen
+- [ ] compileClientJava ausführen
+- [ ] test ausführen
+- [ ] build ausführen
+- [ ] runServer ausführen
+- [ ] runClient ausführen
+- [ ] Roadmap final aktualisieren
+
+### Akzeptanzkriterien
+HUD, Charakterfenster, Duale Hotbars und Combat Feedback funktionieren serverautoritativ. Vanilla-Elemente werden unterdrückt.
+
+### Manueller Testablauf
+Dokumentierter manueller UI-Test.
+
+### Bekannte Einschränkungen
+Fähigkeiten sind reine Dummies, Mana/Rage-Verbrauch noch nicht implementiert.
+
+### Status
+- [ ] In Planung
+
+## Phase 9 – Weapon Cooldown und Angriffsanimation
 
 ### Ziel
 
@@ -1372,7 +1473,7 @@ Ein konsistentes visuelles und spielmechanisches Weapon-Cooldown-System, das den
 
 ### Status
 
-- [ ] In Planung
+- [ ] Ausstehend
 
 ## Spätere Systeme
 

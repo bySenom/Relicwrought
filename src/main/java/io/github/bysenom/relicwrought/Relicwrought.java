@@ -62,6 +62,10 @@ public final class Relicwrought implements ModInitializer {
         ClassSelectionNetworking.registerS2CPayloads();
         PayloadTypeRegistry.clientboundPlay().register(PlayerProgressionSyncPayload.TYPE, PlayerProgressionSyncPayload.STREAM_CODEC);
         PayloadTypeRegistry.serverboundPlay().register(AttributeAllocationRequest.TYPE, AttributeAllocationRequest.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(io.github.bysenom.relicwrought.network.PlayerHudSyncPayload.TYPE, io.github.bysenom.relicwrought.network.PlayerHudSyncPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(io.github.bysenom.relicwrought.network.FloatingDamageNumberPayload.TYPE, io.github.bysenom.relicwrought.network.FloatingDamageNumberPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(io.github.bysenom.relicwrought.network.EnemyUiSyncPayload.TYPE, io.github.bysenom.relicwrought.network.EnemyUiSyncPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.TYPE, io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.CODEC);
         io.github.bysenom.relicwrought.network.WeaponCooldownNetworking.registerPayloads();
         ArpgItemSystems.initialize();
 
@@ -130,6 +134,13 @@ public final class Relicwrought implements ModInitializer {
                 var resourceManager = server.getResourceManager();
                 new RecipeRemovalHandler(config).filterRecipes(recipeManager, registryAccess, resourceManager);
             }
+            
+            ServerPlayNetworking.registerGlobalReceiver(io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.TYPE, (payload, context) -> {
+                context.server().execute(() -> {
+                    var player = context.player();
+                    player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("ui.relicwrought.ability.not_implemented"));
+                });
+            });
             
             if (config.enableArpgCombat() && progressionManager != null) {
                 ArpgItemStackService itemService = new ArpgItemStackService(List.of());
