@@ -205,6 +205,7 @@ public final class Relicwrought implements ModInitializer {
             if (profileManager != null) {
                 profileManager.save();
             }
+            meleeDamageHandler = null;
         });
 
         CommandRegistrationCallback.EVENT.register((dispatcher, buildContext, selection) -> {
