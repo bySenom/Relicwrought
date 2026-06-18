@@ -13,7 +13,7 @@ public final class ArpgItemSystems {
     public static void initialize() {
         bootstrapResult = ArpgDataBootstrap.loadBundledDefinitions(Relicwrought.MOD_ID, Relicwrought.LOGGER);
         Relicwrought.LOGGER.info(
-                "ARPG item definitions loaded: {} item bases, {} affixes, {} affix groups, {} scaling profiles, {} rarities, {} loot profiles, {} classes, {} starter kits, {} errors.",
+                "ARPG item definitions loaded: {} item bases, {} affixes, {} affix groups, {} scaling profiles, {} rarities, {} loot profiles, {} classes, {} starter kits, {} progression profiles, {} errors.",
                 bootstrapResult.itemBases().size(),
                 bootstrapResult.affixes().size(),
                 bootstrapResult.affixGroups().size(),
