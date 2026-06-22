@@ -1445,6 +1445,138 @@ Fähigkeiten sind reine Dummies, Mana/Rage-Verbrauch noch nicht implementiert.
 ### Status
 - [ ] Teilweise implementiert, visuelle Runtime-Fixes laufen.
 
+## Phase 8.6 – RPG-Inventar und Equipment-Slots
+
+### Ziel
+
+Vanilla-Inventar und Crafting werden RPG-artig ersetzt oder erweitert. Zusätzliche Ausrüstungsslots bilden die Grundlage für spätere Endgame-Itemization.
+
+### API-Analyse
+
+- Minecraft 26.2 nutzt `InventoryScreen` mit `InventoryMenu`, `AbstractCraftingMenu`, `CraftingContainer`, `Slot` und Recipe-Book-Anbindung.
+- `InventoryMenu` besitzt feste Bereiche für Crafting-Result, 2x2-Crafting-Grid, Armor, Inventory, Hotbar und Shield/Offhand.
+- Vollständiges Ersetzen des Vanilla-Inventars berührt Slot-Indizes, Quick-Move, Recipe Book und serverseitiges Crafting-Verhalten.
+- Sicherer Startpfad: Phase 8.6A mit separatem RPG-Equipment-Fenster und serverautoritärer Slotvalidierung.
+- Danach Phase 8.6B: Vanilla-Inventar ersetzen oder erweitern und 2x2-Inventar-Crafting ausblenden beziehungsweise serverseitig blockieren.
+
+### Slots
+
+- HEAD
+- NECK
+- SHOULDERS
+- CLOAK
+- CHEST
+- BELT
+- LEGS
+- FEET
+- RING_1
+- RING_2
+- TRINKET_1
+- TRINKET_2
+- MAIN_HAND
+- OFF_HAND
+
+### Optionale spätere Slots
+
+- GLOVES
+- BRACERS
+- RELIC
+- CHARM
+
+### Architektur
+
+- Common-Code bleibt serverautoritär und enthält Slotmodell, Validierung, Persistenz, Sync-Payloads und Stat-Integration.
+- Client-Code enthält nur Screen, Layout, Slotwidgets, Rendering und Tooltips.
+- Bestehende datengetriebene Itembasen mit `valid_slots` und `ArpgEquipmentSlot` werden erweitert, statt ein paralleles Slotsystem zu erfinden.
+- Neue Zusatzslots zählen als globale Itemquellen; lokale Waffen- und Rüstungsaffixe dürfen nicht doppelt angewendet werden.
+
+### Crafting-Entfernung
+
+- Kein sichtbares oder nutzbares Vanilla-2x2-Crafting im Spielerinventar.
+- Recipe-Book-Funktion im Spielerinventar ausblenden oder deaktivieren.
+- Crafting-Grid, Crafting-Output, Quick Craft und Shift Craft serverseitig blockieren.
+- Items aus vorhandenen Crafting-Slots müssen beim Öffnen, Schließen oder Migrieren sicher ins Inventar zurückgelegt oder gedroppt werden.
+- Creative Mode und dedizierter Server dürfen nicht beschädigt werden.
+
+### Config
+
+- `enable_rpg_inventory`
+- `replace_vanilla_inventory_screen`
+- `disable_player_inventory_crafting`
+- `show_equipment_slot_labels`
+- `allow_non_arpg_items_in_equipment`
+- `drop_extra_equipment_on_death`
+- `debug_equipment_sync`
+
+### Übersetzungen
+
+- `ui.relicwrought.inventory.title`
+- `ui.relicwrought.equipment.head`
+- `ui.relicwrought.equipment.neck`
+- `ui.relicwrought.equipment.shoulders`
+- `ui.relicwrought.equipment.cloak`
+- `ui.relicwrought.equipment.chest`
+- `ui.relicwrought.equipment.belt`
+- `ui.relicwrought.equipment.legs`
+- `ui.relicwrought.equipment.feet`
+- `ui.relicwrought.equipment.ring_1`
+- `ui.relicwrought.equipment.ring_2`
+- `ui.relicwrought.equipment.trinket_1`
+- `ui.relicwrought.equipment.trinket_2`
+- `ui.relicwrought.equipment.main_hand`
+- `ui.relicwrought.equipment.off_hand`
+- `ui.relicwrought.inventory.crafting_disabled`
+- `ui.relicwrought.inventory.invalid_slot`
+- `ui.relicwrought.inventory.invalid_item`
+
+### Aufgaben
+
+- [x] aktuellen Phase-8.5-Stand committen
+- [x] Inventory-/Menu-API analysieren
+- [ ] Equipment-Slotmodell erweitern
+- [ ] Equipment-Regeln implementieren
+- [ ] ItemBaseDefinition um neue Equipment-Slots erweitern
+- [ ] neue Schmuck-/Zusatzbasen anlegen
+- [ ] Equipment-Persistenz implementieren
+- [ ] Equipment-Sync implementieren
+- [ ] RPG-Inventory-Screen implementieren
+- [ ] Vanilla-Crafting im Inventar ausblenden
+- [ ] Inventar-Crafting serverseitig blockieren
+- [ ] Equipment-Slots rendern
+- [ ] Slotvalidierung implementieren
+- [ ] Shift-Click-Verhalten implementieren
+- [ ] Stat-Integration erweitern
+- [ ] Death-/Drop-Regel implementieren
+- [ ] Config ergänzen
+- [ ] deutsche Übersetzungen ergänzen
+- [ ] englische Übersetzungen ergänzen
+- [ ] Unit-Tests ergänzen
+- [ ] Integrationstest ergänzen
+- [ ] manuellen Test durchführen
+- [ ] compileJava ausführen
+- [ ] compileClientJava ausführen
+- [ ] test ausführen
+- [ ] build ausführen
+- [ ] runServer ausführen
+- [ ] runClient ausführen
+- [ ] Roadmap final aktualisieren
+
+### Akzeptanzkriterien
+
+Zusätzliche Equipment-Slots sind sichtbar, serverseitig validiert, persistent gespeichert, mit Combat-Stats integriert und über Client-Sync aktuell. Vanilla-2x2-Crafting im Spielerinventar ist nicht sichtbar oder nicht nutzbar, serverseitig blockiert und verursacht keinen Itemverlust.
+
+### Manueller Testablauf
+
+Inventar mit `E` öffnen, Crafting-Bereich und Recipe Book prüfen, RPG-Equipment-Slots testen, gültige und ungültige Items bewegen, Ring-/Trinket-Boni prüfen, Logout/Login, Tod/Drop-Regel, dedizierten Server und Client-Weltstart verifizieren.
+
+### Bekannte Einschränkungen
+
+Vollständiges Vanilla-Inventory-Replacement ist riskanter als ein separates RPG-Equipment-Fenster und soll erst nach stabiler Slotvalidierung, Persistenz und Sync umgesetzt werden.
+
+### Status
+
+- [ ] In Planung, API-Analyse begonnen.
+
 ## Phase 9 – Weapon Cooldown und Angriffsanimation
 
 ### Ziel
