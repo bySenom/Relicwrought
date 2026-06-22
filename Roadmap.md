@@ -1557,8 +1557,8 @@ Vanilla-Inventar und Crafting werden RPG-artig ersetzt oder erweitert. Zusätzli
 - [x] compileClientJava ausführen
 - [x] test ausführen
 - [x] build ausführen
-- [ ] runServer ausführen
-- [ ] runClient ausführen
+- [x] runServer ausführen
+- [x] runClient ausführen
 - [ ] Roadmap final aktualisieren
 
 ### Akzeptanzkriterien
@@ -1575,7 +1575,8 @@ Vollständiges Vanilla-Inventory-Replacement ist riskanter als ein separates RPG
 
 ### Status
 
-- [ ] Phase 8.6A in Implementierung: separates RPG-Equipment-Fenster, Zusatzslots, Persistenz, Sync und Stat-Integration vorhanden; 8.6B fuer Vanilla-Inventory-Replacement und Crafting-Blocking offen.
+- [ ] Phase 8.6A runtime-teilvalidiert: `runServer` startet bis `Done` und stoppt sauber; `runClient` startet bis Ressourcen-, Sound- und Atlas-Initialisierung ohne Crash. Manuelle Slot-Interaktion, Logout/Login-Persistenz und Stat-Aenderungen im Client sind noch nicht vollstaendig runtime-validiert.
+- [ ] Naechster Schritt 8.6B: Vanilla-Inventar-Replacement, Crafting-Feld entfernen, Recipe Book ausblenden und Spielerinventar-Crafting serverseitig blockieren.
 
 ## Phase 9 – Weapon Cooldown und Angriffsanimation
 
