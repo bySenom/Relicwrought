@@ -1443,7 +1443,7 @@ Dokumentierter manueller UI-Test.
 Fähigkeiten sind reine Dummies, Mana/Rage-Verbrauch noch nicht implementiert.
 
 ### Status
-- [ ] In Planung
+- [ ] Teilweise implementiert, visuelle Runtime-Fixes laufen.
 
 ## Phase 9 – Weapon Cooldown und Angriffsanimation
 

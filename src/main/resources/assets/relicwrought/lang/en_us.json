@@ -161,5 +161,8 @@
   "command.relicwrought.combat.stats.lightning_res": "§eLightning Resistance: §f%.1f%%",
   "command.relicwrought.combat.stats.poison_res": "§ePoison Resistance: §f%.1f%%",
   "command.relicwrought.combat.stats.movement": "§eMovement Speed: §f+%.1f%%",
-  "command.relicwrought.combat.stats.life": "§eMaximum Life: §f+%.1f"
+  "command.relicwrought.combat.stats.life": "§eMaximum Life: §f+%.1f",
+  "command.relicwrought.debug.error.not_player": "This command must be executed by a player",
+  "command.relicwrought.debug.damage_number.invalid": "Damage number amount must be finite and positive",
+  "command.relicwrought.debug.damage_number.sent": "Sent debug damage number: %.1f"
 }

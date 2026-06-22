@@ -19,4 +19,8 @@ public class EnemyUiTracker {
         // Expire after 5 seconds (100 ticks)
         return currentTarget != null && (currentGameTime - lastUpdateTime < 100);
     }
+
+    public static int getSnapshotCount(long currentGameTime) {
+        return hasValidTarget(currentGameTime) ? 1 : 0;
+    }
 }

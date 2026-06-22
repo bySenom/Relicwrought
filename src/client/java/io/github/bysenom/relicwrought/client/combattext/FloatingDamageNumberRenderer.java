@@ -14,7 +14,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 public class FloatingDamageNumberRenderer {
 
     public static void render(GuiGraphicsExtractor guiGraphics, float partialTick) {
-        if (!Relicwrought.config().enableCombatText()) return;
+        if (!Relicwrought.config().enableCombatText() || !Relicwrought.config().showFloatingDamageNumbers()) return;
 
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.level == null) return;

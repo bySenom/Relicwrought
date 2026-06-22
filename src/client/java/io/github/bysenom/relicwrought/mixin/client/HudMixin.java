@@ -21,20 +21,22 @@ public abstract class HudMixin {
 
     @Inject(method = "extractHotbarAndDecorations", at = @At("TAIL"))
     private void relicwrought$afterHotbarExtraction(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (!Relicwrought.config().enableRelicwroughtHud()) return;
-
         float partialTick = deltaTracker.getGameTimeDeltaTicks();
-        
-        // Player HP bar and resource bar
-        io.github.bysenom.relicwrought.client.hud.PlayerHudRenderer.render(guiGraphics, partialTick);
-        
-        // Weapon cooldown bar
-        io.github.bysenom.relicwrought.client.hud.WeaponCooldownRenderer.render(guiGraphics, partialTick);
-        
-        // Enemy nameplate (crosshair target)
-        io.github.bysenom.relicwrought.client.enemy.EnemyNameplateRenderer.render(guiGraphics, partialTick);
-        
-        // Floating damage numbers
-        io.github.bysenom.relicwrought.client.combattext.FloatingDamageNumberRenderer.render(guiGraphics, partialTick);
+
+        if (Relicwrought.config().enableRelicwroughtHud()) {
+            // Player HP bar and resource bar
+            io.github.bysenom.relicwrought.client.hud.PlayerHudRenderer.render(guiGraphics, partialTick);
+
+            // Weapon cooldown bar
+            io.github.bysenom.relicwrought.client.hud.WeaponCooldownRenderer.render(guiGraphics, partialTick);
+
+            // Enemy nameplate (crosshair target)
+            io.github.bysenom.relicwrought.client.enemy.EnemyNameplateRenderer.render(guiGraphics, partialTick);
+
+            // Floating damage numbers
+            io.github.bysenom.relicwrought.client.combattext.FloatingDamageNumberRenderer.render(guiGraphics, partialTick);
+        }
+
+        io.github.bysenom.relicwrought.client.hud.UiDebugOverlayRenderer.render(guiGraphics);
     }
 }

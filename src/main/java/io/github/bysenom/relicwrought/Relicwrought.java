@@ -89,6 +89,29 @@ public final class Relicwrought implements ModInitializer {
                 mobDropHandler.onLivingDeath(entity)
         );
 
+        ServerPlayNetworking.registerGlobalReceiver(AttributeAllocationRequest.TYPE, (payload, context) -> {
+            context.server().execute(() -> {
+                var player = context.player();
+                if (progressionManager == null) return;
+                CharacterAttribute attr = payload.resolveAttribute();
+                if (attr == null) {
+                    player.sendSystemMessage(Component.translatable("command.relicwrought.progression.invalid_attribute", payload.attributeName()));
+                    return;
+                }
+                var result = progressionManager.allocateAttribute(player, attr, payload.amount());
+                if (!result.success()) {
+                    player.sendSystemMessage(Component.literal("§c" + result.errorMessage()));
+                }
+            });
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.TYPE, (payload, context) -> {
+            context.server().execute(() -> {
+                var player = context.player();
+                player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("ui.relicwrought.ability.not_implemented"));
+            });
+        });
+
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             if (config.enableClassSelection()) {
                 profileManager = PlayerProfileManager.get(server);
@@ -109,22 +132,6 @@ public final class Relicwrought implements ModInitializer {
                 progressionManager = new ProgressionManager(definitions.progressionProfiles(), profileManager);
                 mobXpResolver = new MobExperienceResolver(config);
 
-                ServerPlayNetworking.registerGlobalReceiver(AttributeAllocationRequest.TYPE, (payload, context) -> {
-                    context.server().execute(() -> {
-                        var player = context.player();
-                        if (progressionManager == null) return;
-                        CharacterAttribute attr = payload.resolveAttribute();
-                        if (attr == null) {
-                            player.sendSystemMessage(Component.translatable("command.relicwrought.progression.invalid_attribute", payload.attributeName()));
-                            return;
-                        }
-                        var result = progressionManager.allocateAttribute(player, attr, payload.amount());
-                        if (!result.success()) {
-                            player.sendSystemMessage(Component.literal("§c" + result.errorMessage()));
-                        }
-                    });
-                });
-
                 LOGGER.info("Character progression system initialized");
             }
 
@@ -134,13 +141,6 @@ public final class Relicwrought implements ModInitializer {
                 var resourceManager = server.getResourceManager();
                 new RecipeRemovalHandler(config).filterRecipes(recipeManager, registryAccess, resourceManager);
             }
-            
-            ServerPlayNetworking.registerGlobalReceiver(io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.TYPE, (payload, context) -> {
-                context.server().execute(() -> {
-                    var player = context.player();
-                    player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("ui.relicwrought.ability.not_implemented"));
-                });
-            });
             
             if (config.enableArpgCombat()) {
                 ArpgItemStackService itemService = new ArpgItemStackService(List.of());

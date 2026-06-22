@@ -2,12 +2,17 @@ package io.github.bysenom.relicwrought;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.lang.reflect.RecordComponent;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public record ArpgModConfig(
@@ -78,8 +83,15 @@ public record ArpgModConfig(
         boolean enableRelicwroughtHud,
         boolean hideVanillaHearts,
         boolean hideVanillaArmor,
+        boolean showHealthNumbers,
+        boolean showResourceNumbers,
         boolean enableCombatText,
-        boolean enableEnemyNameplates
+        boolean showFloatingDamageNumbers,
+        boolean showOwnDamageNumbers,
+        boolean enableEnemyNameplates,
+        boolean showEnemyHealthBars,
+        boolean showEnemyHealthNumbers,
+        boolean enableUiDebugOverlay
 ) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String CONFIG_FILE_NAME = "relicwrought.json";
@@ -150,8 +162,15 @@ public record ArpgModConfig(
                 true,   // enableRelicwroughtHud
                 true,   // hideVanillaHearts
                 true,   // hideVanillaArmor
+                true,   // showHealthNumbers
+                true,   // showResourceNumbers
                 true,   // enableCombatText
-                true    // enableEnemyNameplates
+                true,   // showFloatingDamageNumbers
+                true,   // showOwnDamageNumbers
+                true,   // enableEnemyNameplates
+                true,   // showEnemyHealthBars
+                true,   // showEnemyHealthNumbers
+                true    // enableUiDebugOverlay
         );
     }
 
@@ -160,12 +179,14 @@ public record ArpgModConfig(
         if (Files.exists(configPath)) {
             try {
                 String content = Files.readString(configPath);
-                ArpgModConfig config = GSON.fromJson(content, ArpgModConfig.class);
+                JsonObject root = JsonParser.parseString(content).getAsJsonObject();
+                boolean migratedMissingFields = applyMissingDefaults(root, defaults(), configPath, logger);
+                ArpgModConfig config = GSON.fromJson(root, ArpgModConfig.class);
                 if (config == null) {
                     logger.warn("Invalid config file, using defaults");
                     return save(configPath, defaults(), logger);
                 }
-                return validate(config, configPath, logger);
+                return validate(config, configPath, logger, migratedMissingFields);
             } catch (Exception e) {
                 logger.warn("Failed to load config: {}. Using defaults.", e.getMessage());
                 return save(configPath, defaults(), logger);
@@ -174,8 +195,7 @@ public record ArpgModConfig(
         return save(configPath, defaults(), logger);
     }
 
-    private static ArpgModConfig validate(ArpgModConfig config, Path configPath, Logger logger) {
-        boolean modified = false;
+    private static ArpgModConfig validate(ArpgModConfig config, Path configPath, Logger logger, boolean modified) {
 
         double chance = config.normalMobDropChanceMultiplier();
         if (chance < 0.0) { chance = 0.0; modified = true; }
@@ -241,12 +261,37 @@ public record ArpgModConfig(
                     config.weaponCooldownHeight(), config.weaponCooldownShowReadyFlash(),
                     config.weaponCooldownShowPercentage(),
                     config.enableRelicwroughtHud(), config.hideVanillaHearts(),
-                    config.hideVanillaArmor(), config.enableCombatText(),
-                    config.enableEnemyNameplates()
+                    config.hideVanillaArmor(), config.showHealthNumbers(),
+                    config.showResourceNumbers(), config.enableCombatText(),
+                    config.showFloatingDamageNumbers(), config.showOwnDamageNumbers(),
+                    config.enableEnemyNameplates(), config.showEnemyHealthBars(),
+                    config.showEnemyHealthNumbers(), config.enableUiDebugOverlay()
             );
             return save(configPath, validated, logger);
         }
         return config;
+    }
+
+    private static boolean applyMissingDefaults(JsonObject root, ArpgModConfig defaults, Path configPath, Logger logger) {
+        List<String> missing = new ArrayList<>();
+        for (RecordComponent component : ArpgModConfig.class.getRecordComponents()) {
+            String name = component.getName();
+            if (!root.has(name) || root.get(name).isJsonNull()) {
+                try {
+                    Object value = component.getAccessor().invoke(defaults);
+                    root.add(name, GSON.toJsonTree(value));
+                    missing.add(name);
+                } catch (ReflectiveOperationException e) {
+                    logger.warn("Failed to apply default config value for {}: {}", name, e.getMessage());
+                }
+            }
+        }
+        if (!missing.isEmpty()) {
+            logger.warn("Config {} was missing {} field(s); migrated defaults for: {}",
+                    configPath, missing.size(), String.join(", ", missing));
+            return true;
+        }
+        return false;
     }
 
     private static ArpgModConfig save(Path configPath, ArpgModConfig config, Logger logger) {

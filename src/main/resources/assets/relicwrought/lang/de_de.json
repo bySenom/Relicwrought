@@ -161,5 +161,8 @@
   "command.relicwrought.combat.stats.lightning_res": "§eBlitzwiderstand: §f%.1f%%",
   "command.relicwrought.combat.stats.poison_res": "§eGiftwiderstand: §f%.1f%%",
   "command.relicwrought.combat.stats.movement": "§eBewegungsgeschwindigkeit: §f+%.1f%%",
-  "command.relicwrought.combat.stats.life": "§eMaximales Leben: §f+%.1f"
+  "command.relicwrought.combat.stats.life": "§eMaximales Leben: §f+%.1f",
+  "command.relicwrought.debug.error.not_player": "Dieser Befehl muss von einem Spieler ausgefuehrt werden",
+  "command.relicwrought.debug.damage_number.invalid": "Der Schadenswert muss endlich und positiv sein",
+  "command.relicwrought.debug.damage_number.sent": "Debug-Schadenszahl gesendet: %.1f"
 }

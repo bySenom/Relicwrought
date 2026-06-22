@@ -2,6 +2,7 @@ package io.github.bysenom.relicwrought.client.combattext;
 
 import io.github.bysenom.relicwrought.Relicwrought;
 import io.github.bysenom.relicwrought.combat.damage.CombatTextEvent;
+import io.github.bysenom.relicwrought.ui.CombatTextVisibility;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
@@ -18,25 +19,33 @@ public class FloatingDamageNumberManager {
     private static final List<ActiveDamageNumber> activeNumbers = new ArrayList<>();
     private static final int MAX_LIFETIME_TICKS = 30; // ~1.5 seconds
     private static final int MAX_ACTIVE = 20;
+    private static long lastPayloadClientTick = -1L;
 
     public static void addEvent(CombatTextEvent event) {
-        if (event == null) return;
-        if (Double.isNaN(event.totalDamage()) || Double.isInfinite(event.totalDamage())) return;
-        if (event.totalDamage() <= 0) return;
-        if (!Relicwrought.config().enableCombatText()) return;
-
         Minecraft client = Minecraft.getInstance();
-        if (client.level == null) return;
+        java.util.UUID localPlayerUuid = client.player != null ? client.player.getUUID() : null;
+        if (!CombatTextVisibility.isVisible(
+                event,
+                Relicwrought.config().enableCombatText(),
+                Relicwrought.config().showFloatingDamageNumbers(),
+                Relicwrought.config().showOwnDamageNumbers(),
+                localPlayerUuid
+        )) {
+            return;
+        }
+        lastPayloadClientTick = client.level != null ? client.level.getGameTime() : 0L;
 
         // Look up entity position
-        net.minecraft.world.entity.Entity target = client.level.getEntity(event.targetEntityId());
+        net.minecraft.world.entity.Entity target = client.level != null ? client.level.getEntity(event.targetEntityId()) : null;
         double x, y, z;
         if (target != null) {
             x = target.getX() + (client.level.getRandom().nextFloat() - 0.5) * 0.5;
             y = target.getY() + target.getBbHeight() + 0.3;
             z = target.getZ() + (client.level.getRandom().nextFloat() - 0.5) * 0.5;
         } else {
-            return; // Can't render without a position
+            x = event.sequenceId();
+            y = 0.0;
+            z = 0.0;
         }
 
         // Remove oldest if over limit
@@ -71,8 +80,17 @@ public class FloatingDamageNumberManager {
         return activeNumbers;
     }
 
+    public static int getActiveCount() {
+        return activeNumbers.size();
+    }
+
+    public static boolean hasRecentPayload(long currentGameTime) {
+        return lastPayloadClientTick >= 0L && currentGameTime - lastPayloadClientTick <= MAX_LIFETIME_TICKS;
+    }
+
     public static void clear() {
         activeNumbers.clear();
+        lastPayloadClientTick = -1L;
     }
 
     public static class ActiveDamageNumber {
@@ -115,7 +133,7 @@ public class FloatingDamageNumberManager {
         }
 
         public String getText() {
-            String text = String.valueOf((int) damage);
+            String text = String.valueOf((int) Math.max(0.0, damage));
             if (critical) text += "!";
             return text;
         }

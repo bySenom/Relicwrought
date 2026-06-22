@@ -4,6 +4,7 @@ import io.github.bysenom.relicwrought.Relicwrought;
 import io.github.bysenom.relicwrought.client.ClientArpgState;
 import io.github.bysenom.relicwrought.ui.CharacterResourceState;
 import io.github.bysenom.relicwrought.ui.CharacterResourceType;
+import io.github.bysenom.relicwrought.ui.PlayerHudModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.player.Player;
@@ -17,8 +18,11 @@ import net.minecraft.world.entity.player.Player;
 public class PlayerHudRenderer {
 
     private static boolean debugLogged = false;
+    private static PlayerHudModel lastModel = PlayerHudModel.hidden(false, false);
+    private static boolean renderedThisFrame = false;
 
     public static void render(GuiGraphicsExtractor guiGraphics, float partialTick) {
+        renderedThisFrame = false;
         Minecraft client = Minecraft.getInstance();
         Player player = client.player;
         if (player == null) return;
@@ -34,16 +38,21 @@ public class PlayerHudRenderer {
         int scaledWidth = client.getWindow().getGuiScaledWidth();
         int scaledHeight = client.getWindow().getGuiScaledHeight();
 
-        // --- HP Bar ---
-        // Fallback: use vanilla health if no ARPG sync received yet
-        double maxHp = ClientArpgState.getMaximumHealth();
-        double currentHp = ClientArpgState.getCurrentHealth();
-        if (maxHp <= 0) {
-            // No sync received — use vanilla health as documented fallback
-            currentHp = player.getHealth();
-            maxHp = player.getMaxHealth();
-        }
-        double hpPercent = maxHp > 0 ? Math.max(0, Math.min(1.0, currentHp / maxHp)) : 0;
+        PlayerHudModel model = PlayerHudModel.resolve(
+                Relicwrought.config().enableRelicwroughtHud(),
+                Relicwrought.config().hideVanillaHearts(),
+                Relicwrought.config().hideVanillaArmor(),
+                ClientArpgState.hasHudSync(),
+                ClientArpgState.getCurrentHealth(),
+                ClientArpgState.getMaximumHealth(),
+                player.getHealth(),
+                player.getMaxHealth(),
+                ClientArpgState.getMaximumHealth(),
+                ClientArpgState.getResourceState()
+        );
+        lastModel = model;
+        if (!model.visible()) return;
+        renderedThisFrame = true;
 
         int hpBarWidth = 81;
         int hpBarHeight = 9;
@@ -55,22 +64,23 @@ public class PlayerHudRenderer {
         // Background
         guiGraphics.fill(hpBarX, hpBarY, hpBarX + hpBarWidth, hpBarY + hpBarHeight, 0xFF331111);
         // Fill — gradient from dark red to bright red based on health
-        int filledWidth = (int) (hpBarWidth * hpPercent);
+        int filledWidth = (int) (hpBarWidth * model.healthFill());
         if (filledWidth > 0) {
             guiGraphics.fill(hpBarX, hpBarY, hpBarX + filledWidth, hpBarY + hpBarHeight, 0xFFCC1111);
             // Bright highlight on top pixel row
             guiGraphics.fill(hpBarX, hpBarY, hpBarX + filledWidth, hpBarY + 1, 0xFFFF3333);
         }
         // HP text centered on bar
-        String hpText = (int) currentHp + " / " + (int) maxHp;
-        guiGraphics.centeredText(client.font, hpText, hpBarX + hpBarWidth / 2, hpBarY + 1, 0xFFFFFFFF);
+        if (Relicwrought.config().showHealthNumbers()) {
+            String hpText = (int) model.currentHealth() + " / " + (int) model.maximumHealth();
+            guiGraphics.centeredText(client.font, hpText, hpBarX + hpBarWidth / 2, hpBarY + 1, 0xFFFFFFFF);
+        }
 
         // --- Resource Bar ---
-        CharacterResourceState resource = ClientArpgState.getResourceState();
-        if (resource != null && resource.type() != CharacterResourceType.NONE) {
+        CharacterResourceState resource = model.resourceState();
+        if (model.resourceVisible()) {
             double maxRes = resource.maximumValue();
             double currentRes = resource.currentValue();
-            double resPercent = maxRes > 0 ? Math.max(0, Math.min(1.0, currentRes / maxRes)) : 0;
 
             int resBarWidth = 81;
             int resBarHeight = 9;
@@ -95,14 +105,24 @@ public class PlayerHudRenderer {
             // Background
             guiGraphics.fill(resBarX, resBarY, resBarX + resBarWidth, resBarY + resBarHeight, 0xFF222233);
             // Fill
-            int resFilled = (int) (resBarWidth * resPercent);
+            int resFilled = (int) (resBarWidth * model.resourceFill());
             if (resFilled > 0) {
                 guiGraphics.fill(resBarX, resBarY, resBarX + resFilled, resBarY + resBarHeight, fillColor);
                 guiGraphics.fill(resBarX, resBarY, resBarX + resFilled, resBarY + 1, highlightColor);
             }
             // Text
-            String resText = (int) currentRes + " / " + (int) maxRes;
-            guiGraphics.centeredText(client.font, resText, resBarX + resBarWidth / 2, resBarY + 1, 0xFFFFFFFF);
+            if (Relicwrought.config().showResourceNumbers()) {
+                String resText = resource.type().name().substring(0, 3) + " " + (int) currentRes + "/" + (int) maxRes;
+                guiGraphics.centeredText(client.font, resText, resBarX + resBarWidth / 2, resBarY + 1, 0xFFFFFFFF);
+            }
         }
+    }
+
+    public static PlayerHudModel getLastModel() {
+        return lastModel;
+    }
+
+    public static boolean wasRenderedThisFrame() {
+        return renderedThisFrame;
     }
 }
