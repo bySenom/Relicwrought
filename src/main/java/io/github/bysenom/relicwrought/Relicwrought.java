@@ -18,6 +18,7 @@ import io.github.bysenom.relicwrought.loot.ArpgMobDropHandler;
 import io.github.bysenom.relicwrought.loot.LootProfileResolver;
 import io.github.bysenom.relicwrought.network.AttributeAllocationRequest;
 import io.github.bysenom.relicwrought.network.ClassSelectionNetworking;
+import io.github.bysenom.relicwrought.network.EquipmentOpenPayload;
 import io.github.bysenom.relicwrought.network.EquipmentSlotClickPayload;
 import io.github.bysenom.relicwrought.network.EquipmentSyncPayload;
 import io.github.bysenom.relicwrought.network.EquipmentSyncRequestPayload;
@@ -64,6 +65,15 @@ public final class Relicwrought implements ModInitializer {
         return equipmentRepository;
     }
 
+    public static boolean openEquipmentScreen(ServerPlayer player) {
+        if (player == null || config == null || !config.enableRpgInventory() || equipmentService == null) {
+            return false;
+        }
+        equipmentService.sync(player);
+        ServerPlayNetworking.send(player, new EquipmentOpenPayload());
+        return true;
+    }
+
     @Override
     public void onInitialize() {
         LOGGER.info("Relicwrought loaded. Ready for combat, progression, loot and quests.");
@@ -79,6 +89,7 @@ public final class Relicwrought implements ModInitializer {
         PayloadTypeRegistry.clientboundPlay().register(io.github.bysenom.relicwrought.network.FloatingDamageNumberPayload.TYPE, io.github.bysenom.relicwrought.network.FloatingDamageNumberPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(io.github.bysenom.relicwrought.network.EnemyUiSyncPayload.TYPE, io.github.bysenom.relicwrought.network.EnemyUiSyncPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.TYPE, io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(EquipmentOpenPayload.TYPE, EquipmentOpenPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(EquipmentSyncPayload.TYPE, EquipmentSyncPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(EquipmentSlotClickPayload.TYPE, EquipmentSlotClickPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(EquipmentSyncRequestPayload.TYPE, EquipmentSyncRequestPayload.CODEC);

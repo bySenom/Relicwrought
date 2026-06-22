@@ -2,6 +2,7 @@ package io.github.bysenom.relicwrought.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import io.github.bysenom.relicwrought.Relicwrought;
 import io.github.bysenom.relicwrought.combat.damage.CombatTextEvent;
 import io.github.bysenom.relicwrought.network.FloatingDamageNumberPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -16,6 +17,9 @@ public final class RelicwroughtDebugCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("relicwrought")
+                .then(Commands.literal("equipment")
+                        .then(Commands.literal("open")
+                                .executes(context -> openEquipment(context.getSource()))))
                 .then(Commands.literal("debug")
                         .then(Commands.literal("damage_number")
                                 .then(Commands.argument("amount", DoubleArgumentType.doubleArg(0.01, 1_000_000_000.0))
@@ -23,6 +27,20 @@ public final class RelicwroughtDebugCommand {
                                                 context.getSource(),
                                                 DoubleArgumentType.getDouble(context, "amount")
                                         ))))));
+    }
+
+    private static int openEquipment(CommandSourceStack source) {
+        if (!source.isPlayer()) {
+            source.sendFailure(Component.translatable("command.relicwrought.equipment.error.not_player"));
+            return 0;
+        }
+        ServerPlayer player = source.getPlayer();
+        if (player == null || !Relicwrought.openEquipmentScreen(player)) {
+            source.sendFailure(Component.translatable("command.relicwrought.equipment.open_failed"));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("command.relicwrought.equipment.opened"), false);
+        return 1;
     }
 
     private static int sendDamageNumber(CommandSourceStack source, double amount) {

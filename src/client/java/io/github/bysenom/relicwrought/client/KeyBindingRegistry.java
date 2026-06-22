@@ -16,11 +16,11 @@ public class KeyBindingRegistry {
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
             long window = client.getWindow().handle();
-            // boolean cPressed = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_C) == GLFW.GLFW_PRESS;
-            // if (cPressed && !cKeyPressed && client.screen == null) {
-            //     client.setScreen(new CharacterScreen(ClientArpgState.getCharacterScreenModel()));
-            // }
-            // cKeyPressed = cPressed;
+            boolean cPressed = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_C) == GLFW.GLFW_PRESS;
+            if (cPressed && !cKeyPressed && client.canInterruptScreen()) {
+                RpgEquipmentScreen.open();
+            }
+            cKeyPressed = cPressed;
 
             // boolean rPressed = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_R) == GLFW.GLFW_PRESS;
             // if (rPressed && !rKeyPressed && client.screen == null) {

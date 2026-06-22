@@ -68,6 +68,10 @@ public class RelicwroughtClient implements ClientModInitializer {
             });
         });
 
+        ClientPlayNetworking.registerGlobalReceiver(io.github.bysenom.relicwrought.network.EquipmentOpenPayload.TYPE, (payload, context) -> {
+            context.client().execute(io.github.bysenom.relicwrought.client.screen.RpgEquipmentScreen::open);
+        });
+
         // --- Client Tick ---
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null || client.level == null) return;

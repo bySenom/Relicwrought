@@ -1569,13 +1569,19 @@ Zusätzliche Equipment-Slots sind sichtbar, serverseitig validiert, persistent g
 
 Inventar mit `E` öffnen, Crafting-Bereich und Recipe Book prüfen, RPG-Equipment-Slots testen, gültige und ungültige Items bewegen, Ring-/Trinket-Boni prüfen, Logout/Login, Tod/Drop-Regel, dedizierten Server und Client-Weltstart verifizieren.
 
+8.6A-Zugriffswege:
+
+- `C` oeffnet das separate Relicwrought-RPG-Equipment-Fenster.
+- `O` bleibt als sekundaerer Equipment-Key erhalten.
+- `/relicwrought equipment open` oeffnet das Fenster serverseitig per Sync- und Open-Payload.
+
 ### Bekannte Einschränkungen
 
 Vollständiges Vanilla-Inventory-Replacement ist riskanter als ein separates RPG-Equipment-Fenster und soll erst nach stabiler Slotvalidierung, Persistenz und Sync umgesetzt werden. Phase 8.6A erzwingt kein produktives Crafting-Blocking, ersetzt das Vanilla-Inventar nicht und implementiert noch kein Shift-Click-Verhalten fuer Zusatzslots.
 
 ### Status
 
-- [ ] Phase 8.6A runtime-teilvalidiert: `runServer` startet bis `Done` und stoppt sauber; `runClient` startet bis Ressourcen-, Sound- und Atlas-Initialisierung ohne Crash. Manuelle Slot-Interaktion, Logout/Login-Persistenz und Stat-Aenderungen im Client sind noch nicht vollstaendig runtime-validiert.
+- [ ] Phase 8.6A runtime-teilvalidiert: `runServer` startet bis `Done` und stoppt sauber; `runClient` startet bis Weltstart, und das separate RPG-Equipment-Fenster ist im Client sichtbar per `C` geoeffnet. Vollstaendige Slot-Interaktion mit Ring/Neck/Belt/Trinket, Logout/Login-Persistenz und Stat-Aenderungen sind noch nicht vollstaendig runtime-validiert.
 - [ ] Naechster Schritt 8.6B: Vanilla-Inventar-Replacement, Crafting-Feld entfernen, Recipe Book ausblenden und Spielerinventar-Crafting serverseitig blockieren.
 
 ## Phase 9 – Weapon Cooldown und Angriffsanimation
