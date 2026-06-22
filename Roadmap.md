@@ -1559,6 +1559,7 @@ Vanilla-Inventar und Crafting werden RPG-artig ersetzt oder erweitert. Zusätzli
 - [x] build ausführen
 - [x] runServer ausführen
 - [x] runClient ausführen
+- [x] Roadmap fuer 8.6A-UI-Rework aktualisieren
 - [ ] Roadmap final aktualisieren
 
 ### Akzeptanzkriterien
@@ -1581,7 +1582,8 @@ Vollständiges Vanilla-Inventory-Replacement ist riskanter als ein separates RPG
 
 ### Status
 
-- [ ] Phase 8.6A runtime-teilvalidiert: `runServer` startet bis `Done` und stoppt sauber; `runClient` startet bis Weltstart, und das separate RPG-Equipment-Fenster ist im Client sichtbar per `C` geoeffnet. Vollstaendige Slot-Interaktion mit Ring/Neck/Belt/Trinket, Logout/Login-Persistenz und Stat-Aenderungen sind noch nicht vollstaendig runtime-validiert.
+- [x] Phase 8.6A UI/UX-Rework runtime-validiert am 2026-06-22: `runClient` startet bis Weltbeitritt, `C` oeffnet das separate Relicwrought-RPG-Equipment-Fenster, breite Debugbuttons sind ersetzt durch quadratische Slotwidgets mit Itemicons, Platzhaltern, Stats, Selected-Item-Bereich und Hotbar-Hinweis. Referenz-Screenshot: `build/validation/equipment-screen-rework-final2.png`.
+- [ ] Phase 8.6A vollstaendige Interaktionsvalidierung offen: Ring/Neck/Belt/Trinket gezielt ausruesten, ungueltige Items pruefen, Hover-Tooltips pruefen, Schliessen/Oeffnen, Logout/Login-Persistenz und Stat-Aenderungen ingame nachvollziehen.
 - [ ] Naechster Schritt 8.6B: Vanilla-Inventar-Replacement, Crafting-Feld entfernen, Recipe Book ausblenden und Spielerinventar-Crafting serverseitig blockieren.
 
 ## Phase 9 – Weapon Cooldown und Angriffsanimation
