@@ -1533,30 +1533,30 @@ Vanilla-Inventar und Crafting werden RPG-artig ersetzt oder erweitert. Zusätzli
 
 - [x] aktuellen Phase-8.5-Stand committen
 - [x] Inventory-/Menu-API analysieren
-- [ ] Equipment-Slotmodell erweitern
-- [ ] Equipment-Regeln implementieren
-- [ ] ItemBaseDefinition um neue Equipment-Slots erweitern
-- [ ] neue Schmuck-/Zusatzbasen anlegen
-- [ ] Equipment-Persistenz implementieren
-- [ ] Equipment-Sync implementieren
-- [ ] RPG-Inventory-Screen implementieren
+- [x] Equipment-Slotmodell erweitern
+- [x] Equipment-Regeln implementieren
+- [x] ItemBaseDefinition um neue Equipment-Slots erweitern
+- [x] neue Schmuck-/Zusatzbasen anlegen
+- [x] Equipment-Persistenz implementieren
+- [x] Equipment-Sync implementieren
+- [x] RPG-Equipment-Screen als separates Fenster implementieren
 - [ ] Vanilla-Crafting im Inventar ausblenden
 - [ ] Inventar-Crafting serverseitig blockieren
-- [ ] Equipment-Slots rendern
-- [ ] Slotvalidierung implementieren
+- [x] Equipment-Slots rendern
+- [x] Slotvalidierung implementieren
 - [ ] Shift-Click-Verhalten implementieren
-- [ ] Stat-Integration erweitern
-- [ ] Death-/Drop-Regel implementieren
-- [ ] Config ergänzen
-- [ ] deutsche Übersetzungen ergänzen
-- [ ] englische Übersetzungen ergänzen
-- [ ] Unit-Tests ergänzen
+- [x] Stat-Integration erweitern
+- [x] Death-/Drop-Regel implementieren
+- [x] Config ergänzen
+- [x] deutsche Übersetzungen ergänzen
+- [x] englische Übersetzungen ergänzen
+- [x] Unit-Tests ergänzen
 - [ ] Integrationstest ergänzen
 - [ ] manuellen Test durchführen
-- [ ] compileJava ausführen
-- [ ] compileClientJava ausführen
-- [ ] test ausführen
-- [ ] build ausführen
+- [x] compileJava ausführen
+- [x] compileClientJava ausführen
+- [x] test ausführen
+- [x] build ausführen
 - [ ] runServer ausführen
 - [ ] runClient ausführen
 - [ ] Roadmap final aktualisieren
@@ -1571,11 +1571,11 @@ Inventar mit `E` öffnen, Crafting-Bereich und Recipe Book prüfen, RPG-Equipmen
 
 ### Bekannte Einschränkungen
 
-Vollständiges Vanilla-Inventory-Replacement ist riskanter als ein separates RPG-Equipment-Fenster und soll erst nach stabiler Slotvalidierung, Persistenz und Sync umgesetzt werden.
+Vollständiges Vanilla-Inventory-Replacement ist riskanter als ein separates RPG-Equipment-Fenster und soll erst nach stabiler Slotvalidierung, Persistenz und Sync umgesetzt werden. Phase 8.6A erzwingt kein produktives Crafting-Blocking, ersetzt das Vanilla-Inventar nicht und implementiert noch kein Shift-Click-Verhalten fuer Zusatzslots.
 
 ### Status
 
-- [ ] In Planung, API-Analyse begonnen.
+- [ ] Phase 8.6A in Implementierung: separates RPG-Equipment-Fenster, Zusatzslots, Persistenz, Sync und Stat-Integration vorhanden; 8.6B fuer Vanilla-Inventory-Replacement und Crafting-Blocking offen.
 
 ## Phase 9 – Weapon Cooldown und Angriffsanimation
 

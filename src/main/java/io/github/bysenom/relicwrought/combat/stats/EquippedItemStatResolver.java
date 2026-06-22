@@ -2,8 +2,10 @@ package io.github.bysenom.relicwrought.combat.stats;
 
 import io.github.bysenom.relicwrought.item.model.ArpgItemData;
 import io.github.bysenom.relicwrought.item.persistence.ArpgItemStackService;
+import io.github.bysenom.relicwrought.equipment.PlayerEquipmentRepository;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -11,9 +13,15 @@ import java.util.List;
 
 public final class EquippedItemStatResolver {
     private final ArpgItemStackService stackService;
+    private final PlayerEquipmentRepository equipmentRepository;
 
     public EquippedItemStatResolver(ArpgItemStackService stackService) {
+        this(stackService, null);
+    }
+
+    public EquippedItemStatResolver(ArpgItemStackService stackService, PlayerEquipmentRepository equipmentRepository) {
         this.stackService = stackService;
+        this.equipmentRepository = equipmentRepository;
     }
 
     public List<ArpgItemData> resolveEquippedItems(LivingEntity entity) {
@@ -33,6 +41,9 @@ public final class EquippedItemStatResolver {
             if (stackService.hasArpgData(stack)) {
                 stackService.read(stack).data().ifPresent(equipped::add);
             }
+        }
+        if (entity instanceof ServerPlayer player && equipmentRepository != null) {
+            equipped.addAll(equipmentRepository.getArpgItems(player.getUUID()));
         }
         return equipped;
     }

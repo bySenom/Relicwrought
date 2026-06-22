@@ -91,7 +91,16 @@ public record ArpgModConfig(
         boolean enableEnemyNameplates,
         boolean showEnemyHealthBars,
         boolean showEnemyHealthNumbers,
-        boolean enableUiDebugOverlay
+        boolean enableUiDebugOverlay,
+        
+        // Phase 8.6A RPG equipment window config
+        boolean enableRpgInventory,
+        boolean replaceVanillaInventoryScreen,
+        boolean disablePlayerInventoryCrafting,
+        boolean showEquipmentSlotLabels,
+        boolean allowNonArpgItemsInEquipment,
+        boolean dropExtraEquipmentOnDeath,
+        boolean debugEquipmentSync
 ) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String CONFIG_FILE_NAME = "relicwrought.json";
@@ -170,7 +179,15 @@ public record ArpgModConfig(
                 true,   // enableEnemyNameplates
                 true,   // showEnemyHealthBars
                 true,   // showEnemyHealthNumbers
-                true    // enableUiDebugOverlay
+                true,   // enableUiDebugOverlay
+                
+                true,   // enableRpgInventory
+                false,  // replaceVanillaInventoryScreen (8.6A keeps vanilla inventory intact)
+                false,  // disablePlayerInventoryCrafting (8.6A does not enforce crafting blocking)
+                true,   // showEquipmentSlotLabels
+                false,  // allowNonArpgItemsInEquipment
+                true,   // dropExtraEquipmentOnDeath
+                true    // debugEquipmentSync
         );
     }
 
@@ -265,7 +282,11 @@ public record ArpgModConfig(
                     config.showResourceNumbers(), config.enableCombatText(),
                     config.showFloatingDamageNumbers(), config.showOwnDamageNumbers(),
                     config.enableEnemyNameplates(), config.showEnemyHealthBars(),
-                    config.showEnemyHealthNumbers(), config.enableUiDebugOverlay()
+                    config.showEnemyHealthNumbers(), config.enableUiDebugOverlay(),
+                    config.enableRpgInventory(), config.replaceVanillaInventoryScreen(),
+                    config.disablePlayerInventoryCrafting(), config.showEquipmentSlotLabels(),
+                    config.allowNonArpgItemsInEquipment(), config.dropExtraEquipmentOnDeath(),
+                    config.debugEquipmentSync()
             );
             return save(configPath, validated, logger);
         }

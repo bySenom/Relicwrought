@@ -44,10 +44,19 @@ class ArpgModConfigTest {
         assertTrue(config.showFloatingDamageNumbers());
         assertTrue(config.showOwnDamageNumbers());
         assertTrue(config.enableUiDebugOverlay());
+        assertTrue(config.enableRpgInventory());
+        assertFalse(config.replaceVanillaInventoryScreen());
+        assertFalse(config.disablePlayerInventoryCrafting());
+        assertTrue(config.showEquipmentSlotLabels());
+        assertFalse(config.allowNonArpgItemsInEquipment());
+        assertTrue(config.dropExtraEquipmentOnDeath());
+        assertTrue(config.debugEquipmentSync());
 
         String migrated = Files.readString(configPath);
         assertTrue(migrated.contains("enableUiDebugOverlay"));
         assertTrue(migrated.contains("showFloatingDamageNumbers"));
+        assertTrue(migrated.contains("enableRpgInventory"));
+        assertTrue(migrated.contains("replaceVanillaInventoryScreen"));
     }
 
     @Test

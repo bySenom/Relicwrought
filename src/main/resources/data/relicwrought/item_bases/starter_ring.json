@@ -1,0 +1,13 @@
+{
+  "id": "starter_ring",
+  "translation_key": "item_base.relicwrought.starter_ring",
+  "minecraft_item": "minecraft:gold_nugget",
+  "category": "ring",
+  "valid_slots": ["ring_1", "ring_2"],
+  "base_stats": {},
+  "implicit_affixes": [],
+  "affix_tags": ["jewelry", "ring"],
+  "scaling_profile": "armor_default",
+  "loot_sources": ["normal_enemy", "chest"],
+  "data_version": 1
+}

@@ -3,18 +3,19 @@ package io.github.bysenom.relicwrought.client;
 import io.github.bysenom.relicwrought.client.hud.AbilityHotbarState;
 import io.github.bysenom.relicwrought.client.hud.AbilityInputRouter;
 import io.github.bysenom.relicwrought.client.hud.HotbarMode;
-import io.github.bysenom.relicwrought.client.screen.CharacterScreen;
+import io.github.bysenom.relicwrought.client.screen.RpgEquipmentScreen;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.Minecraft;
 import org.lwjgl.glfw.GLFW;
 
 public class KeyBindingRegistry {
     private static boolean cKeyPressed = false;
     private static boolean rKeyPressed = false;
+    private static boolean oKeyPressed = false;
 
     public static void register() {
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             if (client.player == null) return;
+            long window = client.getWindow().handle();
             // boolean cPressed = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_C) == GLFW.GLFW_PRESS;
             // if (cPressed && !cKeyPressed && client.screen == null) {
             //     client.setScreen(new CharacterScreen(ClientArpgState.getCharacterScreenModel()));
@@ -35,6 +36,12 @@ public class KeyBindingRegistry {
                     }
                 }
             }
+
+            boolean oPressed = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_O) == GLFW.GLFW_PRESS;
+            if (oPressed && !oKeyPressed && client.canInterruptScreen()) {
+                RpgEquipmentScreen.open();
+            }
+            oKeyPressed = oPressed;
         });
     }
 }

@@ -3,6 +3,9 @@ package io.github.bysenom.relicwrought;
 import io.github.bysenom.relicwrought.command.ArpgItemCommand;
 import io.github.bysenom.relicwrought.command.ClassCommand;
 import io.github.bysenom.relicwrought.command.ProgressionCommand;
+import io.github.bysenom.relicwrought.equipment.EquipmentValidationService;
+import io.github.bysenom.relicwrought.equipment.PlayerEquipmentRepository;
+import io.github.bysenom.relicwrought.equipment.PlayerEquipmentService;
 import io.github.bysenom.relicwrought.item.ArpgItemSystems;
 import io.github.bysenom.relicwrought.item.affix.AffixGenerator;
 import io.github.bysenom.relicwrought.item.generation.ArpgItemGenerator;
@@ -15,6 +18,9 @@ import io.github.bysenom.relicwrought.loot.ArpgMobDropHandler;
 import io.github.bysenom.relicwrought.loot.LootProfileResolver;
 import io.github.bysenom.relicwrought.network.AttributeAllocationRequest;
 import io.github.bysenom.relicwrought.network.ClassSelectionNetworking;
+import io.github.bysenom.relicwrought.network.EquipmentSlotClickPayload;
+import io.github.bysenom.relicwrought.network.EquipmentSyncPayload;
+import io.github.bysenom.relicwrought.network.EquipmentSyncRequestPayload;
 import io.github.bysenom.relicwrought.network.PlayerProgressionSyncPayload;
 import io.github.bysenom.relicwrought.player.ClassSelectionManager;
 import io.github.bysenom.relicwrought.player.PlayerProfileManager;
@@ -47,9 +53,15 @@ public final class Relicwrought implements ModInitializer {
     private static ProgressionManager progressionManager;
     private static MobExperienceResolver mobXpResolver;
     private static io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler meleeDamageHandler;
+    private static PlayerEquipmentRepository equipmentRepository;
+    private static PlayerEquipmentService equipmentService;
 
     public static io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler getMeleeDamageHandler() {
         return meleeDamageHandler;
+    }
+
+    public static PlayerEquipmentRepository getEquipmentRepository() {
+        return equipmentRepository;
     }
 
     @Override
@@ -67,6 +79,9 @@ public final class Relicwrought implements ModInitializer {
         PayloadTypeRegistry.clientboundPlay().register(io.github.bysenom.relicwrought.network.FloatingDamageNumberPayload.TYPE, io.github.bysenom.relicwrought.network.FloatingDamageNumberPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(io.github.bysenom.relicwrought.network.EnemyUiSyncPayload.TYPE, io.github.bysenom.relicwrought.network.EnemyUiSyncPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.TYPE, io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(EquipmentSyncPayload.TYPE, EquipmentSyncPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(EquipmentSlotClickPayload.TYPE, EquipmentSlotClickPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(EquipmentSyncRequestPayload.TYPE, EquipmentSyncRequestPayload.CODEC);
         io.github.bysenom.relicwrought.network.WeaponCooldownNetworking.registerPayloads();
         ArpgItemSystems.initialize();
 
@@ -113,7 +128,34 @@ public final class Relicwrought implements ModInitializer {
             });
         });
 
+        ServerPlayNetworking.registerGlobalReceiver(EquipmentSlotClickPayload.TYPE, (payload, context) -> {
+            context.server().execute(() -> {
+                if (equipmentService != null) {
+                    equipmentService.handleSlotClick(context.player(), payload.slot());
+                }
+            });
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(EquipmentSyncRequestPayload.TYPE, (payload, context) -> {
+            context.server().execute(() -> {
+                if (equipmentService != null) {
+                    equipmentService.sync(context.player());
+                }
+            });
+        });
+
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            if (config.enableRpgInventory()) {
+                ArpgItemStackService equipmentItemService = new ArpgItemStackService(List.of());
+                equipmentRepository = PlayerEquipmentRepository.get(server, equipmentItemService);
+                equipmentService = new PlayerEquipmentService(
+                        config,
+                        equipmentRepository,
+                        new EquipmentValidationService(config, equipmentItemService, definitions.itemBases())
+                );
+                LOGGER.info("RPG equipment window initialized with {} extra slots", io.github.bysenom.relicwrought.item.model.ArpgEquipmentSlot.extraSlots().size());
+            }
+
             if (config.enableClassSelection()) {
                 profileManager = PlayerProfileManager.get(server);
                 StarterKitService kitService = new StarterKitService(itemGenerator);
@@ -146,7 +188,7 @@ public final class Relicwrought implements ModInitializer {
             if (config.enableArpgCombat()) {
                 ArpgItemStackService itemService = new ArpgItemStackService(List.of());
                 meleeDamageHandler = 
-                    new io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler(config, itemService, progressionManager);
+                    new io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler(config, itemService, progressionManager, equipmentRepository);
                 meleeDamageHandler.register();
                 LOGGER.info("Combat system initialized");
                 
@@ -212,10 +254,17 @@ public final class Relicwrought implements ModInitializer {
             }
 
             PlayerHudSyncService.send(handler.getPlayer(), profileManager);
+            if (equipmentService != null) {
+                equipmentService.sync(handler.getPlayer());
+            }
         });
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
             mobDropHandler.onLivingDeath(entity);
+
+            if (entity instanceof ServerPlayer deadPlayer && equipmentService != null) {
+                equipmentService.handleDeath(deadPlayer);
+            }
 
             if (config.enableCharacterProgression() && progressionManager != null && mobXpResolver != null) {
                 if (!entity.level().isClientSide()) {
@@ -254,6 +303,11 @@ public final class Relicwrought implements ModInitializer {
             if (profileManager != null) {
                 profileManager.save();
             }
+            if (equipmentRepository != null) {
+                equipmentRepository.save();
+            }
+            equipmentRepository = null;
+            equipmentService = null;
             meleeDamageHandler = null;
         });
 

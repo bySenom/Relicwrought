@@ -1,0 +1,13 @@
+{
+  "id": "starter_trinket",
+  "translation_key": "item_base.relicwrought.starter_trinket",
+  "minecraft_item": "minecraft:amethyst_shard",
+  "category": "trinket",
+  "valid_slots": ["trinket_1", "trinket_2"],
+  "base_stats": {},
+  "implicit_affixes": [],
+  "affix_tags": ["jewelry", "trinket"],
+  "scaling_profile": "armor_default",
+  "loot_sources": ["normal_enemy", "chest"],
+  "data_version": 1
+}

@@ -9,5 +9,11 @@
   "iron_war_axe.json",
   "scout_helmet.json",
   "guard_chestplate.json",
-  "starter_shovel.json"
+  "starter_shovel.json",
+  "starter_necklace.json",
+  "starter_shoulders.json",
+  "starter_cloak.json",
+  "starter_belt.json",
+  "starter_ring.json",
+  "starter_trinket.json"
 ]

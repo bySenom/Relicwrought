@@ -4,6 +4,7 @@ import io.github.bysenom.relicwrought.ArpgModConfig;
 import io.github.bysenom.relicwrought.combat.damage.*;
 import io.github.bysenom.relicwrought.combat.stats.*;
 import io.github.bysenom.relicwrought.combat.stats.*;
+import io.github.bysenom.relicwrought.equipment.PlayerEquipmentRepository;
 import io.github.bysenom.relicwrought.item.ArpgItemSystems;
 import io.github.bysenom.relicwrought.item.format.LocalAffixResolver;
 import io.github.bysenom.relicwrought.item.model.ArpgItemData;
@@ -37,11 +38,20 @@ public final class ArpgMeleeDamageHandler {
     private final io.github.bysenom.relicwrought.combat.cooldown.WeaponAttackManager cooldownManager;
 
     public ArpgMeleeDamageHandler(ArpgModConfig config, ArpgItemStackService itemService, ProgressionManager progressionManager) {
+        this(config, itemService, progressionManager, null);
+    }
+
+    public ArpgMeleeDamageHandler(
+            ArpgModConfig config,
+            ArpgItemStackService itemService,
+            ProgressionManager progressionManager,
+            PlayerEquipmentRepository equipmentRepository
+    ) {
         this.config = config;
         this.itemService = itemService;
         this.progressionManager = progressionManager;
         this.pipeline = new DamagePipeline(config);
-        this.equippedResolver = new EquippedItemStatResolver(itemService);
+        this.equippedResolver = new EquippedItemStatResolver(itemService, equipmentRepository);
         this.cooldownResolver = new io.github.bysenom.relicwrought.combat.cooldown.WeaponCooldownResolver(config, this::getAttackerStats);
         this.cooldownManager = new io.github.bysenom.relicwrought.combat.cooldown.WeaponAttackManager();
     }

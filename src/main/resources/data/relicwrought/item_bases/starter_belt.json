@@ -1,0 +1,13 @@
+{
+  "id": "starter_belt",
+  "translation_key": "item_base.relicwrought.starter_belt",
+  "minecraft_item": "minecraft:leather",
+  "category": "belt",
+  "valid_slots": ["belt"],
+  "base_stats": {},
+  "implicit_affixes": [],
+  "affix_tags": ["leather", "belt"],
+  "scaling_profile": "armor_default",
+  "loot_sources": ["normal_enemy", "chest"],
+  "data_version": 1
+}

@@ -1,0 +1,13 @@
+{
+  "id": "starter_necklace",
+  "translation_key": "item_base.relicwrought.starter_necklace",
+  "minecraft_item": "minecraft:emerald",
+  "category": "necklace",
+  "valid_slots": ["neck"],
+  "base_stats": {},
+  "implicit_affixes": [],
+  "affix_tags": ["jewelry", "necklace"],
+  "scaling_profile": "armor_default",
+  "loot_sources": ["normal_enemy", "chest"],
+  "data_version": 1
+}

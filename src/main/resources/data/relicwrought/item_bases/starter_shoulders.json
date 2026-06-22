@@ -1,0 +1,22 @@
+{
+  "id": "starter_shoulders",
+  "translation_key": "item_base.relicwrought.starter_shoulders",
+  "minecraft_item": "minecraft:leather",
+  "category": "shoulders",
+  "valid_slots": ["shoulders"],
+  "base_stats": {
+    "armor": 1.0,
+    "durability": 50
+  },
+  "implicit_affixes": [],
+  "affix_tags": ["armor", "shoulders"],
+  "scaling_profile": "armor_default",
+  "scaling": {
+    "armor_profile": "armor_default",
+    "durability_profile": "armor_durability_default",
+    "armor_multiplier": 0.50,
+    "durability_multiplier": 0.50
+  },
+  "loot_sources": ["normal_enemy", "chest"],
+  "data_version": 1
+}

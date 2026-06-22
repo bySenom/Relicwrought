@@ -1,0 +1,13 @@
+{
+  "id": "starter_cloak",
+  "translation_key": "item_base.relicwrought.starter_cloak",
+  "minecraft_item": "minecraft:white_banner",
+  "category": "cloak",
+  "valid_slots": ["cloak"],
+  "base_stats": {},
+  "implicit_affixes": [],
+  "affix_tags": ["cloth", "cloak"],
+  "scaling_profile": "armor_default",
+  "loot_sources": ["normal_enemy", "chest"],
+  "data_version": 1
+}

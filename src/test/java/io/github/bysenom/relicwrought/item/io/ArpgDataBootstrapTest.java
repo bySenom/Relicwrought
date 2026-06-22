@@ -22,13 +22,15 @@ final class ArpgDataBootstrapTest {
         );
 
         assertTrue(result.errors().isEmpty(), () -> String.join("\n", result.errors()));
-        assertEquals(11, result.itemBases().size());
+        assertEquals(17, result.itemBases().size());
         assertEquals(25, result.affixes().size());
         assertEquals(23, result.affixGroups().size());
         assertEquals(8, result.scalingProfiles().size());
         assertEquals(5, result.rarities().size());
         assertEquals(5, result.lootProfiles().size());
         assertTrue(result.itemBases().get(DefinitionKey.parse("starter_pickaxe", Relicwrought.MOD_ID)).isPresent());
+        assertTrue(result.itemBases().get(DefinitionKey.parse("starter_ring", Relicwrought.MOD_ID)).isPresent());
+        assertTrue(result.itemBases().get(DefinitionKey.parse("starter_trinket", Relicwrought.MOD_ID)).isPresent());
         assertTrue(result.scalingProfiles().get(DefinitionKey.parse("weapon_damage_default", Relicwrought.MOD_ID)).isPresent());
         assertTrue(result.rarities().get(DefinitionKey.parse("common", Relicwrought.MOD_ID)).isPresent());
         assertTrue(result.rarities().get(DefinitionKey.parse("rare", Relicwrought.MOD_ID)).isPresent());

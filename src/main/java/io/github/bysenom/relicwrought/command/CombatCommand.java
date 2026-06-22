@@ -44,7 +44,7 @@ public final class CombatCommand {
                 : CharacterCombatStats.empty();
 
         ArpgItemStackService itemService = new ArpgItemStackService(List.of());
-        EquippedItemStatResolver equippedResolver = new EquippedItemStatResolver(itemService);
+        EquippedItemStatResolver equippedResolver = new EquippedItemStatResolver(itemService, Relicwrought.getEquipmentRepository());
         CharacterCombatStats equippedStats = equippedResolver.collectGlobalStats(player);
 
         CharacterCombatStats totalStats = CharacterCombatStatResolver.combine(baseStats, equippedStats);

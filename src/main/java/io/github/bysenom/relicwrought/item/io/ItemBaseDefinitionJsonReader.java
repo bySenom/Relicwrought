@@ -25,7 +25,7 @@ public final class ItemBaseDefinitionJsonReader implements DefinitionJsonReader<
                 JsonReaderSupport.requiredString(json, "translation_key"),
                 JsonReaderSupport.requiredString(json, "minecraft_item"),
                 ItemCategory.valueOf(JsonReaderSupport.requiredString(json, "category").toUpperCase()),
-                JsonReaderSupport.enumSet(json, "valid_slots", ArpgEquipmentSlot::valueOf),
+                readValidSlots(json),
                 new BaseStatBlock(
                         JsonReaderSupport.optionalDouble(stats, "damage_min", 0.0D),
                         JsonReaderSupport.optionalDouble(stats, "damage_max", 0.0D),
@@ -42,6 +42,13 @@ public final class ItemBaseDefinitionJsonReader implements DefinitionJsonReader<
                 JsonReaderSupport.keySet(json, "loot_sources", defaultNamespace),
                 JsonReaderSupport.requiredInt(json, "data_version")
         );
+    }
+
+    private static java.util.Set<ArpgEquipmentSlot> readValidSlots(JsonObject json) {
+        if (json.has("allowed_equipment_slots")) {
+            return JsonReaderSupport.enumSet(json, "allowed_equipment_slots", ArpgEquipmentSlot::valueOf);
+        }
+        return JsonReaderSupport.enumSet(json, "valid_slots", ArpgEquipmentSlot::valueOf);
     }
 
     private static ItemBaseScaling readScaling(JsonObject json, DefinitionKey fallbackScalingProfile, String defaultNamespace) {
