@@ -3,10 +3,13 @@
   "package": "io.github.bysenom.relicwrought.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "PlayerAttackMixin"
+    "PlayerAttackMixin",
+    "InventoryMenuMixin",
+    "AbstractContainerMenuMixin"
   ],
   "client": [
     "client.MinecraftMixin",
+    "client.InventoryKeyMixin",
     "client.LivingEntityClientMixin",
     "client.HudMixin",
     "client.VanillaHudSuppressionMixin"

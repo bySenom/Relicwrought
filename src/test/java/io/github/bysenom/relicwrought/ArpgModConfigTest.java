@@ -45,8 +45,8 @@ class ArpgModConfigTest {
         assertTrue(config.showOwnDamageNumbers());
         assertTrue(config.enableUiDebugOverlay());
         assertTrue(config.enableRpgInventory());
-        assertFalse(config.replaceVanillaInventoryScreen());
-        assertFalse(config.disablePlayerInventoryCrafting());
+        assertTrue(config.replaceVanillaInventoryScreen());
+        assertTrue(config.disablePlayerInventoryCrafting());
         assertTrue(config.showEquipmentSlotLabels());
         assertFalse(config.allowNonArpgItemsInEquipment());
         assertTrue(config.dropExtraEquipmentOnDeath());

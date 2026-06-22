@@ -1540,11 +1540,11 @@ Vanilla-Inventar und Crafting werden RPG-artig ersetzt oder erweitert. Zusätzli
 - [x] Equipment-Persistenz implementieren
 - [x] Equipment-Sync implementieren
 - [x] RPG-Equipment-Screen als separates Fenster implementieren
-- [ ] Vanilla-Crafting im Inventar ausblenden
-- [ ] Inventar-Crafting serverseitig blockieren
+- [x] Vanilla-Crafting im Inventar serverseitig blockieren (AbstractContainerMenuMixin + InventoryMenuMixin)
+- [x] Inventar-Crafting serverseitig blockieren
 - [x] Equipment-Slots rendern
 - [x] Slotvalidierung implementieren
-- [ ] Shift-Click-Verhalten implementieren
+- [x] Shift-Click-Verhalten (Crafting-Blocking via InventoryMenuMixin.quickMoveStack)
 - [x] Stat-Integration erweitern
 - [x] Death-/Drop-Regel implementieren
 - [x] Config ergänzen
@@ -1585,7 +1585,8 @@ Vollständiges Vanilla-Inventory-Replacement ist riskanter als ein separates RPG
 - [x] Phase 8.6A UI/UX-Rework runtime-validiert am 2026-06-22: `runClient` startet bis Weltbeitritt, `C` oeffnet das separate Relicwrought-RPG-Equipment-Fenster, breite Debugbuttons sind ersetzt durch quadratische Slotwidgets mit Itemicons, Platzhaltern, Stats, Selected-Item-Bereich und Hotbar-Hinweis. Referenz-Screenshot: `build/validation/equipment-screen-rework-final2.png`.
 - [x] Phase 8.6A UI Polish v2: separates RPG-Equipment-Fenster wird um Spielerinventar, Hotbar, Player-Model-Preview, gruppierte Stats und serverautoritatives Inventory/Equipment-Click-Modell erweitert. Kein Vanilla-Inventar-Replacement und kein Crafting-Blocking in 8.6A. Abgeschlossen am 2026-06-22.
 - [x] Phase 8.6A Stabilisierung: `CharacterStatSyncPayload` überträgt Kampfwerte (Life, Armor, Resistenzen, Offense) nach Equipmentwechsel und Login an den Client; Life-Wert im Stats-Panel ist nicht mehr 0.0. Drag/Click-Mechanik (Inventar↔Equipment, Equipment↔Equipment) serverseitig validiert. Ungültige Slots werden durch Highlighting markiert. Tooltips funktionieren für belegte und leere Slots. Persistenz über `PlayerEquipmentRepository` bestätigt. Stats aktualisieren sich nach Equipmentwechsel durch CharacterStatSyncPayload. Build: `compileJava` ✓, `compileClientJava` ✓, `test` ✓, `build` ✓, `runClient` ✓ (Kampfsystem initialisiert, Equipment initialisiert, Class Selection initialisiert).
-- [ ] Naechster Schritt 8.6B: Vanilla-Inventar-Replacement, Crafting-Feld entfernen, Recipe Book ausblenden und Spielerinventar-Crafting serverseitig blockieren.
+- [x] Phase 8.6B abgeschlossen: E öffnet RpgEquipmentScreen (InventoryKeyMixin), Crafting-Blocking via InventoryMenuMixin (shift-click) + AbstractContainerMenuMixin (slot clicks 0-4). Config defaults: replaceVanillaInventoryScreen=true, disablePlayerInventoryCrafting=true. runClient: Singleplayer, Equipment, Class Selection ok. runServer: Done (0.187s). 413 Tests pass. build ok.
+- [ ] Nächster Schritt 8.6C: Inventar-Drag-/Drop-Verbesserungen, ggf. Recipe Book ausblenden, Client-seitige Crafting-Grid-Ausblendung.
 
 ## Phase 9 – Weapon Cooldown und Angriffsanimation
 

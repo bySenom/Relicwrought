@@ -182,8 +182,8 @@ public record ArpgModConfig(
                 true,   // enableUiDebugOverlay
                 
                 true,   // enableRpgInventory
-                false,  // replaceVanillaInventoryScreen (8.6A keeps vanilla inventory intact)
-                false,  // disablePlayerInventoryCrafting (8.6A does not enforce crafting blocking)
+                true,   // replaceVanillaInventoryScreen (8.6B: E opens RpgEquipmentScreen instead)
+                true,   // disablePlayerInventoryCrafting (8.6B: block 2x2 crafting in player inventory)
                 true,   // showEquipmentSlotLabels
                 false,  // allowNonArpgItemsInEquipment
                 true,   // dropExtraEquipmentOnDeath
