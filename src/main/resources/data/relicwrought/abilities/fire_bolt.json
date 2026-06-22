@@ -1,0 +1,17 @@
+{
+  "id": "relicwrought:fire_bolt",
+  "translationKey": "ability.relicwrought.fire_bolt",
+  "descriptionTranslationKey": "ability.relicwrought.fire_bolt.description",
+  "icon": "relicwrought:textures/gui/abilities/fire_bolt.png",
+  "allowedClasses": ["arcanist"],
+  "resourceType": "MANA",
+  "resourceCost": 20.0,
+  "cooldownTicks": 40,
+  "targetingType": "LOOK_DIRECTION",
+  "effectType": "DAMAGE",
+  "basePower": 10.0,
+  "scaling": 1.5,
+  "range": 20,
+  "radius": 0,
+  "dataVersion": 1
+}

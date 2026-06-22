@@ -1,0 +1,17 @@
+{
+  "id": "relicwrought:quick_jab",
+  "translationKey": "ability.relicwrought.quick_jab",
+  "descriptionTranslationKey": "ability.relicwrought.quick_jab.description",
+  "icon": "relicwrought:textures/gui/abilities/quick_jab.png",
+  "allowedClasses": ["rogue"],
+  "resourceType": "ENERGY",
+  "resourceCost": 15.0,
+  "cooldownTicks": 20,
+  "targetingType": "TARGET_ENTITY",
+  "effectType": "DAMAGE",
+  "basePower": 4.0,
+  "scaling": 0.8,
+  "range": 4,
+  "radius": 0,
+  "dataVersion": 1
+}

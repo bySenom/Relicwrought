@@ -12,7 +12,8 @@
     "client.InventoryKeyMixin",
     "client.LivingEntityClientMixin",
     "client.HudMixin",
-    "client.VanillaHudSuppressionMixin"
+    "client.VanillaHudSuppressionMixin",
+    "client.MouseHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

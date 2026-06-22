@@ -16,4 +16,10 @@ public class AbilityInputRouter {
         }
         return false;
     }
+
+    public static boolean shouldBlockHotbarScroll(HotbarMode mode, boolean isScreenOpen, boolean isPlayerPresent) {
+        if (!isPlayerPresent) return false;
+        if (isScreenOpen) return false;
+        return mode == HotbarMode.ABILITY;
+    }
 }

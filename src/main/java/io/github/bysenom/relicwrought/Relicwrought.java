@@ -1,5 +1,6 @@
 package io.github.bysenom.relicwrought;
 
+import io.github.bysenom.relicwrought.ability.*;
 import io.github.bysenom.relicwrought.command.ArpgItemCommand;
 import io.github.bysenom.relicwrought.command.ClassCommand;
 import io.github.bysenom.relicwrought.command.ProgressionCommand;
@@ -17,18 +18,8 @@ import io.github.bysenom.relicwrought.loot.ArpgDropGenerator;
 import io.github.bysenom.relicwrought.loot.ArpgMobDropHandler;
 import io.github.bysenom.relicwrought.loot.LootProfileResolver;
 import io.github.bysenom.relicwrought.combat.stats.CharacterCombatStats;
-import io.github.bysenom.relicwrought.network.AttributeAllocationRequest;
-import io.github.bysenom.relicwrought.network.CharacterStatSyncPayload;
-import io.github.bysenom.relicwrought.network.ClassSelectionNetworking;
-import io.github.bysenom.relicwrought.network.EquipmentOpenPayload;
-import io.github.bysenom.relicwrought.network.EquipmentScreenClickPayload;
-import io.github.bysenom.relicwrought.network.EquipmentSlotClickPayload;
-import io.github.bysenom.relicwrought.network.EquipmentSyncPayload;
-import io.github.bysenom.relicwrought.network.EquipmentSyncRequestPayload;
-import io.github.bysenom.relicwrought.network.PlayerProgressionSyncPayload;
-import io.github.bysenom.relicwrought.player.ClassSelectionManager;
-import io.github.bysenom.relicwrought.player.PlayerProfileManager;
-import io.github.bysenom.relicwrought.player.StarterKitService;
+import io.github.bysenom.relicwrought.network.*;
+import io.github.bysenom.relicwrought.player.*;
 import io.github.bysenom.relicwrought.progression.*;
 import io.github.bysenom.relicwrought.recipe.RecipeRemovalHandler;
 import io.github.bysenom.relicwrought.ui.PlayerHudSyncService;
@@ -40,12 +31,18 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 public final class Relicwrought implements ModInitializer {
     public static final String MOD_ID = "relicwrought";
@@ -59,6 +56,12 @@ public final class Relicwrought implements ModInitializer {
     private static io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler meleeDamageHandler;
     private static PlayerEquipmentRepository equipmentRepository;
     private static PlayerEquipmentService equipmentService;
+    
+    // Phase 9 Ability system
+    private static AbilityRegistry abilityRegistry;
+    private static AbilityExecutionService abilityExecutionService;
+    private static final Map<UUID, PlayerAbilityLoadout> playerLoadouts = new HashMap<>();
+    private static final Map<UUID, PlayerAbilityCooldowns> playerCooldowns = new HashMap<>();
 
     public static io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler getMeleeDamageHandler() {
         return meleeDamageHandler;
@@ -66,6 +69,80 @@ public final class Relicwrought implements ModInitializer {
 
     public static PlayerEquipmentRepository getEquipmentRepository() {
         return equipmentRepository;
+    }
+    
+    public static AbilityRegistry getAbilityRegistry() {
+        return abilityRegistry;
+    }
+    
+    public static PlayerAbilityLoadout getLoadout(ServerPlayer player) {
+        return playerLoadouts.computeIfAbsent(player.getUUID(), k -> {
+            String classId = profileManager != null ? profileManager.getProfile(player.getUUID()).classId() : null;
+            return PlayerAbilityLoadout.defaultsForClass(classId);
+        });
+    }
+    
+    public static PlayerAbilityCooldowns getCooldowns(ServerPlayer player) {
+        return playerCooldowns.computeIfAbsent(player.getUUID(), k -> new PlayerAbilityCooldowns());
+    }
+
+    public static void syncAbilityLoadout(ServerPlayer player) {
+        try {
+            AbilityLoadoutSyncPayload payload = createAbilityLoadoutSyncPayload(player);
+
+            StringBuilder sb = new StringBuilder("ability_loadout_sync about to send:\n");
+            List<AbilitySlotSyncEntry> slots = payload.slots();
+            for (int i = 0; i < 9; i++) {
+                if (i >= slots.size()) {
+                    sb.append("slot ").append(i).append(": empty (missing from list)\n");
+                    continue;
+                }
+                AbilitySlotSyncEntry entry = slots.get(i);
+                if (entry == null) {
+                    sb.append("slot ").append(i).append(": WARN slot was null, replacing with empty\n");
+                    continue;
+                }
+                if (entry.abilityId() == null) {
+                    sb.append("slot ").append(i).append(": WARN ability optional was null, replacing with empty\n");
+                    continue;
+                }
+                if (entry.abilityId().isPresent() && entry.abilityId().get() == null) {
+                    sb.append("slot ").append(i).append(": WARN ability id value was null, replacing with empty\n");
+                    continue;
+                }
+                String idStr = (entry.abilityId() != null && entry.abilityId().isPresent())
+                        ? entry.abilityId().get().toString() : "empty";
+                sb.append("slot ").append(i).append(": ").append(idStr).append("\n");
+            }
+            LOGGER.info(sb.toString());
+
+            // Pre-encode test
+            try {
+                net.minecraft.network.RegistryFriendlyByteBuf testBuf = new net.minecraft.network.RegistryFriendlyByteBuf(
+                        io.netty.buffer.Unpooled.buffer(), player.registryAccess());
+                AbilityLoadoutSyncPayload.STREAM_CODEC.encode(testBuf, payload);
+            } catch (Exception ex) {
+                LOGGER.error("Ability loadout payload failed pre-encode, sending empty fallback", ex);
+                payload = createEmptyPayload();
+            }
+
+            ServerPlayNetworking.send(player, payload);
+        } catch (Exception e) {
+            LOGGER.error("Failed to sync ability loadout for {}, sending empty fallback",
+                    player.getName().getString(), e);
+            ServerPlayNetworking.send(player, createEmptyPayload());
+        }
+    }
+
+    private static AbilityLoadoutSyncPayload createEmptyPayload() {
+        List<AbilitySlotSyncEntry> empty = new java.util.ArrayList<>(9);
+        for (int i = 0; i < 9; i++) empty.add(new AbilitySlotSyncEntry(i, Optional.empty()));
+        return new AbilityLoadoutSyncPayload(empty);
+    }
+
+    private static AbilityLoadoutSyncPayload createAbilityLoadoutSyncPayload(ServerPlayer player) {
+        // SCHRITT 1: ISOLATIONS-TEST - ALWAYS SEND EMPTY
+        return createEmptyPayload();
     }
 
     public static boolean openEquipmentScreen(ServerPlayer player) {
@@ -98,6 +175,9 @@ public final class Relicwrought implements ModInitializer {
         PayloadTypeRegistry.serverboundPlay().register(EquipmentSlotClickPayload.TYPE, EquipmentSlotClickPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(EquipmentSyncRequestPayload.TYPE, EquipmentSyncRequestPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(CharacterStatSyncPayload.TYPE, CharacterStatSyncPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(AbilityLoadoutSyncPayload.TYPE, AbilityLoadoutSyncPayload.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(AbilityCooldownSyncPayload.TYPE, AbilityCooldownSyncPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(AbilityUseResultPayload.TYPE, AbilityUseResultPayload.CODEC);
         io.github.bysenom.relicwrought.network.WeaponCooldownNetworking.registerPayloads();
         ArpgItemSystems.initialize();
 
@@ -137,10 +217,30 @@ public final class Relicwrought implements ModInitializer {
             });
         });
 
-        ServerPlayNetworking.registerGlobalReceiver(io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.TYPE, (payload, context) -> {
+        ServerPlayNetworking.registerGlobalReceiver(AbilitySlotInputPayload.TYPE, (payload, context) -> {
             context.server().execute(() -> {
-                var player = context.player();
-                player.sendSystemMessage(net.minecraft.network.chat.Component.translatable("ui.relicwrought.ability.not_implemented"));
+                if (!config.enableAbilities() || !config.enableAbilityHotbar()) return;
+                if (!payload.isPressed()) return;
+                ServerPlayer player = context.player();
+                if (!player.isAlive()) return;
+                PlayerAbilityLoadout loadout = getLoadout(player);
+                PlayerAbilityCooldowns cooldowns = getCooldowns(player);
+                PlayerArpgProfile profile = profileManager != null ? profileManager.getProfile(player.getUUID()) : null;
+                if (profile == null) return;
+                var result = abilityExecutionService.activate(player, payload.slotIndex(), loadout, cooldowns, profile);
+                if (result.success() && config.enableAbilityResourceCosts() && profileManager != null) {
+                    profileManager.saveProfile(player.getUUID(), profile);
+                    PlayerHudSyncService.send(player, profileManager);
+                }
+                if (config.enableAbilityCooldowns()) {
+                    Map<String, Integer> active = cooldowns.getActiveCooldowns();
+                    ServerPlayNetworking.send(player, new AbilityCooldownSyncPayload(active));
+                }
+                ServerPlayNetworking.send(player, new AbilityUseResultPayload(payload.slotIndex(), result.success(), result.message()));
+                if (config.debugAbilities()) {
+                    LOGGER.info("Ability use by {}: slot={}, success={}, msg={}",
+                            player.getName().getString(), payload.slotIndex(), result.success(), result.message());
+                }
             });
         });
 
@@ -175,6 +275,12 @@ public final class Relicwrought implements ModInitializer {
         });
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            if (config.enableAbilities()) {
+                abilityRegistry = AbilityLoader.loadAbilities(MOD_ID, LOGGER);
+                abilityExecutionService = new AbilityExecutionService(abilityRegistry);
+                LOGGER.info("Ability system initialized with {} abilities", abilityRegistry.size());
+            }
+            
             if (config.enableRpgInventory()) {
                 ArpgItemStackService equipmentItemService = new ArpgItemStackService(List.of());
                 equipmentRepository = PlayerEquipmentRepository.get(server, equipmentItemService);
@@ -249,6 +355,16 @@ public final class Relicwrought implements ModInitializer {
             }
 
             net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(srv -> {
+                if (config.enableAbilities() && config.enableAbilityCooldowns()) {
+                    for (ServerPlayer player : srv.getPlayerList().getPlayers()) {
+                        if (srv.getTickCount() % 5 == 0) {
+                            PlayerAbilityCooldowns cds = playerCooldowns.get(player.getUUID());
+                            if (cds != null) {
+                                cds.tick();
+                            }
+                        }
+                    }
+                }
                 if (!config.enableRelicwroughtHud() || srv.getTickCount() % 5 != 0) {
                     return;
                 }
@@ -289,6 +405,10 @@ public final class Relicwrought implements ModInitializer {
             }
             if (meleeDamageHandler != null) {
                 sendCharacterStats(handler.getPlayer());
+            }
+            if (config.enableAbilities() && abilityExecutionService != null) {
+                ServerPlayer player = handler.getPlayer();
+                syncAbilityLoadout(player);
             }
         });
 
@@ -342,6 +462,10 @@ public final class Relicwrought implements ModInitializer {
             equipmentRepository = null;
             equipmentService = null;
             meleeDamageHandler = null;
+            playerLoadouts.clear();
+            playerCooldowns.clear();
+            abilityRegistry = null;
+            abilityExecutionService = null;
         });
 
         CommandRegistrationCallback.EVENT.register((dispatcher, buildContext, selection) -> {
@@ -356,6 +480,9 @@ public final class Relicwrought implements ModInitializer {
                 io.github.bysenom.relicwrought.command.CombatCommand.register(dispatcher, progressionManager, config);
             }
             io.github.bysenom.relicwrought.command.RelicwroughtDebugCommand.register(dispatcher);
+            if (abilityRegistry != null) {
+                io.github.bysenom.relicwrought.command.AbilityCommand.register(dispatcher, abilityRegistry);
+            }
         });
 
         LOGGER.info("Relicwrought initialized: mob drops={}, recipe removal={}, class selection={}",

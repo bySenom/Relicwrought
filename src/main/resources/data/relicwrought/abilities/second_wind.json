@@ -1,0 +1,17 @@
+{
+  "id": "relicwrought:second_wind",
+  "translationKey": "ability.relicwrought.second_wind",
+  "descriptionTranslationKey": "ability.relicwrought.second_wind.description",
+  "icon": "relicwrought:textures/gui/abilities/second_wind.png",
+  "allowedClasses": ["warrior", "ranger", "arcanist", "rogue"],
+  "resourceType": "NONE",
+  "resourceCost": 0.0,
+  "cooldownTicks": 400,
+  "targetingType": "SELF",
+  "effectType": "HEAL",
+  "basePower": 20.0,
+  "scaling": 0.0,
+  "range": 0,
+  "radius": 0,
+  "dataVersion": 1
+}

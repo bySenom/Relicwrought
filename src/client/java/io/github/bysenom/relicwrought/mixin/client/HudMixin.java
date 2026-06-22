@@ -35,6 +35,9 @@ public abstract class HudMixin {
 
             // Floating damage numbers
             io.github.bysenom.relicwrought.client.combattext.FloatingDamageNumberRenderer.render(guiGraphics, partialTick);
+
+            // Dual / Ability hotbar
+            io.github.bysenom.relicwrought.client.hud.DualHotbarRenderer.render(guiGraphics, partialTick);
         }
 
         io.github.bysenom.relicwrought.client.hud.UiDebugOverlayRenderer.render(guiGraphics);

@@ -1,0 +1,17 @@
+{
+  "id": "relicwrought:power_strike",
+  "translationKey": "ability.relicwrought.power_strike",
+  "descriptionTranslationKey": "ability.relicwrought.power_strike.description",
+  "icon": "relicwrought:textures/gui/abilities/power_strike.png",
+  "allowedClasses": ["warrior"],
+  "resourceType": "RAGE",
+  "resourceCost": 25.0,
+  "cooldownTicks": 80,
+  "targetingType": "TARGET_ENTITY",
+  "effectType": "DAMAGE",
+  "basePower": 8.0,
+  "scaling": 1.2,
+  "range": 4,
+  "radius": 0,
+  "dataVersion": 1
+}

@@ -1,5 +1,6 @@
 package io.github.bysenom.relicwrought.client;
 
+import io.github.bysenom.relicwrought.Relicwrought;
 import io.github.bysenom.relicwrought.client.hud.AbilityHotbarState;
 import io.github.bysenom.relicwrought.client.hud.AbilityInputRouter;
 import io.github.bysenom.relicwrought.client.hud.HotbarMode;
@@ -22,13 +23,14 @@ public class KeyBindingRegistry {
             }
             cKeyPressed = cPressed;
 
-            // boolean rPressed = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_R) == GLFW.GLFW_PRESS;
-            // if (rPressed && !rKeyPressed && client.screen == null) {
-            //     AbilityHotbarState.toggleMode();
-            // }
-            // rKeyPressed = rPressed;
+            boolean rPressed = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_R) == GLFW.GLFW_PRESS;
+            if (rPressed && !rKeyPressed && client.canInterruptScreen()) {
+                if (Relicwrought.config().enableAbilityHotbar()) {
+                    AbilityHotbarState.toggleMode();
+                }
+            }
+            rKeyPressed = rPressed;
 
-            // Intercept 1-9 keys if in Ability mode
             if (AbilityHotbarState.getCurrentMode() == HotbarMode.ABILITY) {
                 for (int i = 0; i < 9; i++) {
                     while (client.options.keyHotbarSlots[i].consumeClick()) {

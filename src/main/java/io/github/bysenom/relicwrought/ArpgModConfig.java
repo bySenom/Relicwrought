@@ -100,7 +100,14 @@ public record ArpgModConfig(
         boolean showEquipmentSlotLabels,
         boolean allowNonArpgItemsInEquipment,
         boolean dropExtraEquipmentOnDeath,
-        boolean debugEquipmentSync
+        boolean debugEquipmentSync,
+        
+        // Phase 9 Ability config
+        boolean enableAbilities,
+        boolean enableAbilityHotbar,
+        boolean enableAbilityResourceCosts,
+        boolean enableAbilityCooldowns,
+        boolean debugAbilities
 ) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String CONFIG_FILE_NAME = "relicwrought.json";
@@ -187,7 +194,13 @@ public record ArpgModConfig(
                 true,   // showEquipmentSlotLabels
                 false,  // allowNonArpgItemsInEquipment
                 true,   // dropExtraEquipmentOnDeath
-                true    // debugEquipmentSync
+                true,   // debugEquipmentSync
+                
+                true,   // enableAbilities (Phase 9)
+                true,   // enableAbilityHotbar
+                true,   // enableAbilityResourceCosts
+                true,   // enableAbilityCooldowns
+                true    // debugAbilities
         );
     }
 
@@ -286,7 +299,10 @@ public record ArpgModConfig(
                     config.enableRpgInventory(), config.replaceVanillaInventoryScreen(),
                     config.disablePlayerInventoryCrafting(), config.showEquipmentSlotLabels(),
                     config.allowNonArpgItemsInEquipment(), config.dropExtraEquipmentOnDeath(),
-                    config.debugEquipmentSync()
+                    config.debugEquipmentSync(),
+                    config.enableAbilities(), config.enableAbilityHotbar(),
+                    config.enableAbilityResourceCosts(), config.enableAbilityCooldowns(),
+                    config.debugAbilities()
             );
             return save(configPath, validated, logger);
         }

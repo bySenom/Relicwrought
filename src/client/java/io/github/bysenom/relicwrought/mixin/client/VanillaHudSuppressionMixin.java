@@ -53,4 +53,15 @@ public abstract class VanillaHudSuppressionMixin {
             ci.cancel();
         }
     }
+
+    @Inject(method = "extractItemHotbar", at = @At("HEAD"), cancellable = true)
+    private void relicwrought$hideVanillaItemHotbar(
+            GuiGraphicsExtractor guiGraphics,
+            net.minecraft.client.DeltaTracker deltaTracker,
+            CallbackInfo ci
+    ) {
+        if (Relicwrought.config().enableRelicwroughtHud() && io.github.bysenom.relicwrought.client.hud.AbilityHotbarState.getCurrentMode() == io.github.bysenom.relicwrought.client.hud.HotbarMode.ABILITY) {
+            ci.cancel();
+        }
+    }
 }
