@@ -21,6 +21,7 @@ import io.github.bysenom.relicwrought.player.PlayerProfileManager;
 import io.github.bysenom.relicwrought.player.StarterKitService;
 import io.github.bysenom.relicwrought.progression.*;
 import io.github.bysenom.relicwrought.recipe.RecipeRemovalHandler;
+import io.github.bysenom.relicwrought.ui.PlayerHudSyncService;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
@@ -174,6 +175,15 @@ public final class Relicwrought implements ModInitializer {
                     }
                 });
             }
+
+            net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(srv -> {
+                if (!config.enableRelicwroughtHud() || srv.getTickCount() % 5 != 0) {
+                    return;
+                }
+                for (ServerPlayer player : srv.getPlayerList().getPlayers()) {
+                    PlayerHudSyncService.send(player, profileManager);
+                }
+            });
         });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
@@ -200,6 +210,8 @@ public final class Relicwrought implements ModInitializer {
                 );
                 ServerPlayNetworking.send(player, syncPayload);
             }
+
+            PlayerHudSyncService.send(handler.getPlayer(), profileManager);
         });
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
@@ -256,6 +268,7 @@ public final class Relicwrought implements ModInitializer {
                 ProgressionCommand.register(dispatcher, progressionManager, config);
                 io.github.bysenom.relicwrought.command.CombatCommand.register(dispatcher, progressionManager, config);
             }
+            io.github.bysenom.relicwrought.command.RelicwroughtDebugCommand.register(dispatcher);
         });
 
         LOGGER.info("Relicwrought initialized: mob drops={}, recipe removal={}, class selection={}",
