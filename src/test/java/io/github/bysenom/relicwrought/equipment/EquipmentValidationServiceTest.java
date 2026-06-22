@@ -21,6 +21,7 @@ final class EquipmentValidationServiceTest {
     private static final DefinitionKey RING_ID = DefinitionKey.parse("starter_ring", "relicwrought");
     private static final DefinitionKey NECK_ID = DefinitionKey.parse("starter_necklace", "relicwrought");
     private static final DefinitionKey SHIELD_ID = DefinitionKey.parse("starter_shield", "relicwrought");
+    private static final DefinitionKey SWORD_ID = DefinitionKey.parse("starter_sword", "relicwrought");
 
     private ArpgItemStackService itemService;
     private InMemoryDataRegistry<ItemBaseDefinition> itemBases;
@@ -33,6 +34,7 @@ final class EquipmentValidationServiceTest {
         itemBases.register(base(RING_ID, ItemCategory.RING, Set.of(ArpgEquipmentSlot.RING_1, ArpgEquipmentSlot.RING_2)));
         itemBases.register(base(NECK_ID, ItemCategory.NECKLACE, Set.of(ArpgEquipmentSlot.NECK)));
         itemBases.register(base(SHIELD_ID, ItemCategory.SHIELD, Set.of(ArpgEquipmentSlot.OFF_HAND)));
+        itemBases.register(base(SWORD_ID, ItemCategory.SWORD, Set.of(ArpgEquipmentSlot.MAIN_HAND)));
         validation = new EquipmentValidationService(ArpgModConfig.defaults(), itemService, itemBases);
     }
 
@@ -60,6 +62,24 @@ final class EquipmentValidationServiceTest {
 
         assertFalse(result.success());
         assertEquals("ui.relicwrought.inventory.vanilla_slot_read_only", result.translationKey());
+    }
+
+    @Test
+    void screenValidationAllowsVanillaMappedEquipmentSlots() {
+        ItemStack sword = arpgStack(SWORD_ID);
+        ItemStack shield = arpgStack(SHIELD_ID);
+
+        assertTrue(validation.validateForSlot(sword, ArpgEquipmentSlot.MAIN_HAND).success());
+        assertTrue(validation.validateForSlot(shield, ArpgEquipmentSlot.OFF_HAND).success());
+    }
+
+    @Test
+    void screenValidationRejectsItemsInWrongSlots() {
+        ItemStack sword = arpgStack(SWORD_ID);
+        ItemStack ring = arpgStack(RING_ID);
+
+        assertFalse(validation.validateForSlot(sword, ArpgEquipmentSlot.RING_1).success());
+        assertFalse(validation.validateForSlot(ring, ArpgEquipmentSlot.HEAD).success());
     }
 
     @Test

@@ -1,6 +1,7 @@
 package io.github.bysenom.relicwrought.client;
 
 import io.github.bysenom.relicwrought.Relicwrought;
+import io.github.bysenom.relicwrought.network.CharacterStatSyncPayload;
 import io.github.bysenom.relicwrought.network.WeaponCooldownSyncPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -34,6 +35,12 @@ public class RelicwroughtClient implements ClientModInitializer {
                         payload.totalXp(), payload.unspentAttributePoints(), payload.allocatedAttributes(),
                         payload.totalAttributes()
                 );
+            });
+        });
+
+        ClientPlayNetworking.registerGlobalReceiver(CharacterStatSyncPayload.TYPE, (payload, context) -> {
+            context.client().execute(() -> {
+                io.github.bysenom.relicwrought.client.ClientArpgState.getCharacterScreenModel().updateStats(payload.stats());
             });
         });
 

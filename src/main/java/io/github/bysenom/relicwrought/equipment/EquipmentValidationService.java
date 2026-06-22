@@ -29,6 +29,13 @@ public final class EquipmentValidationService {
         if (!slot.isExtraSlot()) {
             return EquipmentChangeResult.failure("ui.relicwrought.inventory.vanilla_slot_read_only");
         }
+        return validateForSlot(stack, slot);
+    }
+
+    public EquipmentChangeResult validateForSlot(ItemStack stack, ArpgEquipmentSlot slot) {
+        if (slot == null) {
+            return EquipmentChangeResult.failure("ui.relicwrought.inventory.invalid_slot");
+        }
         if (stack == null || stack.isEmpty()) {
             return EquipmentChangeResult.failure("ui.relicwrought.inventory.no_selected_item");
         }

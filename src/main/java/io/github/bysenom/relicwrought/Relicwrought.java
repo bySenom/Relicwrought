@@ -16,9 +16,12 @@ import io.github.bysenom.relicwrought.item.scaling.ItemStatScaler;
 import io.github.bysenom.relicwrought.loot.ArpgDropGenerator;
 import io.github.bysenom.relicwrought.loot.ArpgMobDropHandler;
 import io.github.bysenom.relicwrought.loot.LootProfileResolver;
+import io.github.bysenom.relicwrought.combat.stats.CharacterCombatStats;
 import io.github.bysenom.relicwrought.network.AttributeAllocationRequest;
+import io.github.bysenom.relicwrought.network.CharacterStatSyncPayload;
 import io.github.bysenom.relicwrought.network.ClassSelectionNetworking;
 import io.github.bysenom.relicwrought.network.EquipmentOpenPayload;
+import io.github.bysenom.relicwrought.network.EquipmentScreenClickPayload;
 import io.github.bysenom.relicwrought.network.EquipmentSlotClickPayload;
 import io.github.bysenom.relicwrought.network.EquipmentSyncPayload;
 import io.github.bysenom.relicwrought.network.EquipmentSyncRequestPayload;
@@ -90,9 +93,11 @@ public final class Relicwrought implements ModInitializer {
         PayloadTypeRegistry.clientboundPlay().register(io.github.bysenom.relicwrought.network.EnemyUiSyncPayload.TYPE, io.github.bysenom.relicwrought.network.EnemyUiSyncPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.TYPE, io.github.bysenom.relicwrought.network.AbilitySlotInputPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(EquipmentOpenPayload.TYPE, EquipmentOpenPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(EquipmentScreenClickPayload.TYPE, EquipmentScreenClickPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(EquipmentSyncPayload.TYPE, EquipmentSyncPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(EquipmentSlotClickPayload.TYPE, EquipmentSlotClickPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(EquipmentSyncRequestPayload.TYPE, EquipmentSyncRequestPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(CharacterStatSyncPayload.TYPE, CharacterStatSyncPayload.CODEC);
         io.github.bysenom.relicwrought.network.WeaponCooldownNetworking.registerPayloads();
         ArpgItemSystems.initialize();
 
@@ -143,6 +148,20 @@ public final class Relicwrought implements ModInitializer {
             context.server().execute(() -> {
                 if (equipmentService != null) {
                     equipmentService.handleSlotClick(context.player(), payload.slot());
+                    if (meleeDamageHandler != null) {
+                        sendCharacterStats(context.player());
+                    }
+                }
+            });
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(EquipmentScreenClickPayload.TYPE, (payload, context) -> {
+            context.server().execute(() -> {
+                if (equipmentService != null) {
+                    equipmentService.handleScreenClick(context.player(), payload);
+                    if (meleeDamageHandler != null) {
+                        sendCharacterStats(context.player());
+                    }
                 }
             });
         });
@@ -268,6 +287,9 @@ public final class Relicwrought implements ModInitializer {
             if (equipmentService != null) {
                 equipmentService.sync(handler.getPlayer());
             }
+            if (meleeDamageHandler != null) {
+                sendCharacterStats(handler.getPlayer());
+            }
         });
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
@@ -343,6 +365,13 @@ public final class Relicwrought implements ModInitializer {
 
     public static ArpgModConfig config() {
         return config;
+    }
+
+    private static void sendCharacterStats(net.minecraft.server.level.ServerPlayer player) {
+        if (meleeDamageHandler != null) {
+            CharacterCombatStats stats = meleeDamageHandler.getAttackerStats(player);
+            net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(player, new CharacterStatSyncPayload(stats));
+        }
     }
 
     private static net.minecraft.world.entity.player.Player findPlayerKiller(net.minecraft.world.entity.LivingEntity entity) {

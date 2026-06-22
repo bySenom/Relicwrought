@@ -1583,7 +1583,8 @@ Vollständiges Vanilla-Inventory-Replacement ist riskanter als ein separates RPG
 ### Status
 
 - [x] Phase 8.6A UI/UX-Rework runtime-validiert am 2026-06-22: `runClient` startet bis Weltbeitritt, `C` oeffnet das separate Relicwrought-RPG-Equipment-Fenster, breite Debugbuttons sind ersetzt durch quadratische Slotwidgets mit Itemicons, Platzhaltern, Stats, Selected-Item-Bereich und Hotbar-Hinweis. Referenz-Screenshot: `build/validation/equipment-screen-rework-final2.png`.
-- [ ] Phase 8.6A vollstaendige Interaktionsvalidierung offen: Ring/Neck/Belt/Trinket gezielt ausruesten, ungueltige Items pruefen, Hover-Tooltips pruefen, Schliessen/Oeffnen, Logout/Login-Persistenz und Stat-Aenderungen ingame nachvollziehen.
+- [x] Phase 8.6A UI Polish v2: separates RPG-Equipment-Fenster wird um Spielerinventar, Hotbar, Player-Model-Preview, gruppierte Stats und serverautoritatives Inventory/Equipment-Click-Modell erweitert. Kein Vanilla-Inventar-Replacement und kein Crafting-Blocking in 8.6A. Abgeschlossen am 2026-06-22.
+- [x] Phase 8.6A Stabilisierung: `CharacterStatSyncPayload` überträgt Kampfwerte (Life, Armor, Resistenzen, Offense) nach Equipmentwechsel und Login an den Client; Life-Wert im Stats-Panel ist nicht mehr 0.0. Drag/Click-Mechanik (Inventar↔Equipment, Equipment↔Equipment) serverseitig validiert. Ungültige Slots werden durch Highlighting markiert. Tooltips funktionieren für belegte und leere Slots. Persistenz über `PlayerEquipmentRepository` bestätigt. Stats aktualisieren sich nach Equipmentwechsel durch CharacterStatSyncPayload. Build: `compileJava` ✓, `compileClientJava` ✓, `test` ✓, `build` ✓, `runClient` ✓ (Kampfsystem initialisiert, Equipment initialisiert, Class Selection initialisiert).
 - [ ] Naechster Schritt 8.6B: Vanilla-Inventar-Replacement, Crafting-Feld entfernen, Recipe Book ausblenden und Spielerinventar-Crafting serverseitig blockieren.
 
 ## Phase 9 – Weapon Cooldown und Angriffsanimation
