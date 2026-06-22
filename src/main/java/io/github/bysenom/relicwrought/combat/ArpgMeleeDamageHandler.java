@@ -88,7 +88,7 @@ public final class ArpgMeleeDamageHandler {
         }
 
         // 1. Resolve Attacker Stats
-        CharacterProgression progression = progressionManager.getProgression(attacker);
+        CharacterProgression progression = progressionManager != null ? progressionManager.getProgression(attacker) : null;
         int level = progression != null ? progression.level().value() : 1;
         
         CharacterCombatStats attackerStats = getAttackerStats(attacker);
@@ -96,7 +96,7 @@ public final class ArpgMeleeDamageHandler {
         // 2. Resolve Target Stats
         CharacterCombatStats targetStats;
         if (target instanceof ServerPlayer targetPlayer) {
-            CharacterProgression targetProg = progressionManager.getProgression(targetPlayer);
+            CharacterProgression targetProg = progressionManager != null ? progressionManager.getProgression(targetPlayer) : null;
             CharacterCombatStats targetBase = targetProg != null 
                     ? AttributeCombatResolver.resolve(targetProg.allocatedAttributes(), config)
                     : CharacterCombatStats.empty();

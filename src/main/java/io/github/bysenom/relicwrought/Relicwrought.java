@@ -142,7 +142,7 @@ public final class Relicwrought implements ModInitializer {
                 });
             });
             
-            if (config.enableArpgCombat() && progressionManager != null) {
+            if (config.enableArpgCombat()) {
                 ArpgItemStackService itemService = new ArpgItemStackService(List.of());
                 meleeDamageHandler = 
                     new io.github.bysenom.relicwrought.combat.ArpgMeleeDamageHandler(config, itemService, progressionManager);
