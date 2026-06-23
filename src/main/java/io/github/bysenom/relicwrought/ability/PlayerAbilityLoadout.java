@@ -3,6 +3,7 @@ package io.github.bysenom.relicwrought.ability;
 import io.github.bysenom.relicwrought.item.model.DefinitionKey;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -73,11 +74,11 @@ public final class PlayerAbilityLoadout {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PlayerAbilityLoadout that)) return false;
-        return List.of(abilityIds).equals(List.of(that.abilityIds));
+        return Arrays.equals(abilityIds, that.abilityIds);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash((Object[]) abilityIds);
+        return Arrays.hashCode(abilityIds);
     }
 }

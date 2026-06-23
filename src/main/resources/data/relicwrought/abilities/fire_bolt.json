@@ -9,6 +9,7 @@
   "cooldownTicks": 40,
   "targetingType": "LOOK_DIRECTION",
   "effectType": "DAMAGE",
+  "damageType": "FIRE",
   "basePower": 10.0,
   "scaling": 1.5,
   "range": 20,

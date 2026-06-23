@@ -26,11 +26,14 @@ public final class AbilityExecutionService {
 
     public AbilityActivationResult activate(ServerPlayer player, int slotIndex, PlayerAbilityLoadout loadout,
                                             PlayerAbilityCooldowns cooldowns, PlayerArpgProfile profile) {
+        if (player == null) {
+            return AbilityActivationResult.failure("No player");
+        }
+        if (!player.isAlive()) {
+            return AbilityActivationResult.failure("You are dead");
+        }
         if (!Relicwrought.config().enableAbilities()) {
             return AbilityActivationResult.failure("Abilities are disabled");
-        }
-        if (player != null && !player.isAlive()) {
-            return AbilityActivationResult.failure("You are dead");
         }
 
         Optional<String> slotAbilityId = loadout.getAbilityId(slotIndex);
@@ -74,27 +77,39 @@ public final class AbilityExecutionService {
             return AbilityActivationResult.failure("No valid target");
         }
 
+        // TODO: add dedicated attackPower/spellPower stat to CharacterCombatStats
         double effectivePower = ability.basePower();
         if (ability.scaling() > 0) {
             var handler = Relicwrought.getMeleeDamageHandler();
             if (handler != null) {
                 CharacterCombatStats attStats = handler.getAttackerStats(player);
-                effectivePower = ability.basePower() + ability.scaling() * attStats.maximumLife();
+                DamageType dt = ability.damageType();
+                if (dt == DamageType.PHYSICAL) {
+                    effectivePower = ability.basePower() + ability.scaling() * attStats.flatPhysicalDamage();
+                } else if (dt == DamageType.FIRE) {
+                    effectivePower = ability.basePower() + ability.scaling() * attStats.fireDamage();
+                }
+                // For other types and heals, scaling is 0 until dedicated stats exist
             }
         }
 
         AbilityEffectResult effectResult = applyEffect(player, ability, target, effectivePower);
-        double resourceCost = ability.resourceCost();
+
+        if (!effectResult.success()) {
+            return AbilityActivationResult.failure(effectResult.message());
+        }
+
+        PlayerArpgProfile updatedProfile = profile;
         if (Relicwrought.config().enableAbilityResourceCosts()) {
-            resourceCost = Math.max(0, Math.min(resourceCost, profile.currentResourceValue()));
-            profile = profile.withResourceValue(profile.currentResourceValue() - resourceCost);
+            double resourceCost = Math.max(0, Math.min(ability.resourceCost(), profile.currentResourceValue()));
+            updatedProfile = profile.withResourceValue(profile.currentResourceValue() - resourceCost);
         }
 
         if (Relicwrought.config().enableAbilityCooldowns()) {
             cooldowns.startCooldown(abilityIdStr, ability.cooldownTicks());
         }
 
-        return AbilityActivationResult.success(effectivePower, effectResult.message(), profile);
+        return AbilityActivationResult.success(effectivePower, effectResult.message(), updatedProfile);
     }
 
     private LivingEntity resolveTarget(ServerPlayer player, AbilityDefinition ability) {
@@ -149,21 +164,21 @@ public final class AbilityExecutionService {
         return switch (ability.effectType()) {
             case DAMAGE -> applyDamage(player, ability, target, power);
             case HEAL -> applyHeal(player, ability, power);
-            case BUFF_PLACEHOLDER -> new AbilityEffectResult("Buff not implemented");
-            case DASH_PLACEHOLDER -> new AbilityEffectResult("Dash not implemented");
+            case BUFF_PLACEHOLDER -> new AbilityEffectResult(false, "Buff not implemented");
+            case DASH_PLACEHOLDER -> new AbilityEffectResult(false, "Dash not implemented");
         };
     }
 
     private AbilityEffectResult applyDamage(ServerPlayer player, AbilityDefinition ability, LivingEntity target, double power) {
-        if (target == null) return new AbilityEffectResult("No target");
+        if (target == null) return new AbilityEffectResult(false, "No target");
 
-        DamageType damageType = ability.id().path().contains("fire") ? DamageType.FIRE : DamageType.PHYSICAL;
+        DamageType damageType = ability.damageType() != null ? ability.damageType() : DamageType.PHYSICAL;
         DamageBundle damage = DamageBundle.single(damageType, power);
         float finalDamage = (float) damage.getTotalDamage();
 
         target.hurt(player.damageSources().playerAttack(player), finalDamage);
 
-        return new AbilityEffectResult("Dealt " + String.format("%.1f", finalDamage) + " damage");
+        return new AbilityEffectResult(true, "Dealt " + String.format("%.1f", finalDamage) + " damage");
     }
 
     private AbilityEffectResult applyHeal(ServerPlayer player, AbilityDefinition ability, double power) {
@@ -173,7 +188,7 @@ public final class AbilityExecutionService {
         if (healAmount > 0) {
             player.heal(healAmount);
         }
-        return new AbilityEffectResult("Healed for " + String.format("%.1f", healAmount));
+        return new AbilityEffectResult(true, "Healed for " + String.format("%.1f", healAmount));
     }
 
     public record AbilityActivationResult(boolean success, String message, PlayerArpgProfile updatedProfile) {
@@ -186,6 +201,6 @@ public final class AbilityExecutionService {
         }
     }
 
-    private record AbilityEffectResult(String message) {
+    private record AbilityEffectResult(boolean success, String message) {
     }
 }

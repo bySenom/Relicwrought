@@ -14,24 +14,24 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 import java.util.Map;
 
 public final class AbilityCommand {
     private AbilityCommand() {}
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, AbilityRegistry registry) {
+    /** Registers ability commands. Registry is resolved at execution time so this can be called before SERVER_STARTED. */
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("ability")
                 .then(Commands.literal("list")
-                        .executes(ctx -> listAbilities(ctx.getSource(), registry)))
+                        .executes(ctx -> listAbilities(ctx.getSource())))
                 .then(Commands.literal("grant")
                         .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                         .then(Commands.argument("ability_id", StringArgumentType.word())
-                                .executes(ctx -> grantAbility(ctx.getSource(), registry,
+                                .executes(ctx -> grantAbility(ctx.getSource(),
                                         StringArgumentType.getString(ctx, "ability_id"), -1))
                                 .then(Commands.argument("slot", IntegerArgumentType.integer(1, 9))
-                                        .executes(ctx -> grantAbility(ctx.getSource(), registry,
+                                        .executes(ctx -> grantAbility(ctx.getSource(),
                                                 StringArgumentType.getString(ctx, "ability_id"),
                                                 IntegerArgumentType.getInteger(ctx, "slot"))))))
                 .then(Commands.literal("clear")
@@ -45,7 +45,12 @@ public final class AbilityCommand {
         );
     }
 
-    private static int listAbilities(CommandSourceStack source, AbilityRegistry registry) {
+    private static int listAbilities(CommandSourceStack source) {
+        AbilityRegistry registry = Relicwrought.getAbilityRegistry();
+        if (registry == null) {
+            source.sendFailure(Component.literal("Ability system not loaded"));
+            return 0;
+        }
         source.sendSuccess(() -> Component.literal("=== Loaded Abilities (" + registry.size() + ") ==="), false);
         for (AbilityDefinition def : registry.all()) {
             source.sendSuccess(() -> Component.literal("  " + def.id() + " [" + def.effectType() + "] class="
@@ -55,9 +60,14 @@ public final class AbilityCommand {
         return 1;
     }
 
-    private static int grantAbility(CommandSourceStack source, AbilityRegistry registry, String abilityId, int slot) {
+    private static int grantAbility(CommandSourceStack source, String abilityId, int slot) {
         if (!source.isPlayer()) {
             source.sendFailure(Component.literal("Player only"));
+            return 0;
+        }
+        AbilityRegistry registry = Relicwrought.getAbilityRegistry();
+        if (registry == null) {
+            source.sendFailure(Component.literal("Ability system not loaded"));
             return 0;
         }
         ServerPlayer player = source.getPlayer();

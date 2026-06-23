@@ -95,40 +95,33 @@ public final class Relicwrought implements ModInitializer {
         try {
             AbilityLoadoutSyncPayload payload = createAbilityLoadoutSyncPayload(player);
 
-            StringBuilder sb = new StringBuilder("ability_loadout_sync about to send:\n");
-            List<AbilitySlotSyncEntry> slots = payload.slots();
-            for (int i = 0; i < 9; i++) {
-                if (i >= slots.size()) {
-                    sb.append("slot ").append(i).append(": empty (missing from list)\n");
-                    continue;
+            if (config != null && config.debugAbilities()) {
+                StringBuilder sb = new StringBuilder("ability_loadout_sync about to send:\n");
+                List<AbilitySlotSyncEntry> slots = payload.slots();
+                for (int i = 0; i < 9; i++) {
+                    if (i >= slots.size()) {
+                        sb.append("slot ").append(i).append(": empty (missing from list)\n");
+                        continue;
+                    }
+                    AbilitySlotSyncEntry entry = slots.get(i);
+                    if (entry == null || entry.abilityId() == null) {
+                        sb.append("slot ").append(i).append(": empty\n");
+                        continue;
+                    }
+                    String idStr = entry.abilityId().isPresent() ? entry.abilityId().get().toString() : "empty";
+                    sb.append("slot ").append(i).append(": ").append(idStr).append("\n");
                 }
-                AbilitySlotSyncEntry entry = slots.get(i);
-                if (entry == null) {
-                    sb.append("slot ").append(i).append(": WARN slot was null, replacing with empty\n");
-                    continue;
-                }
-                if (entry.abilityId() == null) {
-                    sb.append("slot ").append(i).append(": WARN ability optional was null, replacing with empty\n");
-                    continue;
-                }
-                if (entry.abilityId().isPresent() && entry.abilityId().get() == null) {
-                    sb.append("slot ").append(i).append(": WARN ability id value was null, replacing with empty\n");
-                    continue;
-                }
-                String idStr = (entry.abilityId() != null && entry.abilityId().isPresent())
-                        ? entry.abilityId().get().toString() : "empty";
-                sb.append("slot ").append(i).append(": ").append(idStr).append("\n");
-            }
-            LOGGER.info(sb.toString());
+                LOGGER.info(sb.toString());
 
-            // Pre-encode test
-            try {
-                net.minecraft.network.RegistryFriendlyByteBuf testBuf = new net.minecraft.network.RegistryFriendlyByteBuf(
-                        io.netty.buffer.Unpooled.buffer(), player.registryAccess());
-                AbilityLoadoutSyncPayload.STREAM_CODEC.encode(testBuf, payload);
-            } catch (Exception ex) {
-                LOGGER.error("Ability loadout payload failed pre-encode, sending empty fallback", ex);
-                payload = createEmptyPayload();
+                // Pre-encode validation only in debug mode
+                try {
+                    net.minecraft.network.RegistryFriendlyByteBuf testBuf = new net.minecraft.network.RegistryFriendlyByteBuf(
+                            io.netty.buffer.Unpooled.buffer(), player.registryAccess());
+                    AbilityLoadoutSyncPayload.STREAM_CODEC.encode(testBuf, payload);
+                } catch (Exception ex) {
+                    LOGGER.error("Ability loadout payload failed pre-encode, sending empty fallback", ex);
+                    payload = createEmptyPayload();
+                }
             }
 
             ServerPlayNetworking.send(player, payload);
@@ -207,10 +200,6 @@ public final class Relicwrought implements ModInitializer {
         );
         LootProfileResolver profileResolver = new LootProfileResolver(definitions.lootProfiles());
         ArpgMobDropHandler mobDropHandler = new ArpgMobDropHandler(dropGenerator, profileResolver, config);
-
-        ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) ->
-                mobDropHandler.onLivingDeath(entity)
-        );
 
         ServerPlayNetworking.registerGlobalReceiver(AttributeAllocationRequest.TYPE, (payload, context) -> {
             context.server().execute(() -> {
@@ -489,9 +478,7 @@ public final class Relicwrought implements ModInitializer {
                 io.github.bysenom.relicwrought.command.CombatCommand.register(dispatcher, progressionManager, config);
             }
             io.github.bysenom.relicwrought.command.RelicwroughtDebugCommand.register(dispatcher);
-            if (abilityRegistry != null) {
-                io.github.bysenom.relicwrought.command.AbilityCommand.register(dispatcher, abilityRegistry);
-            }
+            io.github.bysenom.relicwrought.command.AbilityCommand.register(dispatcher);
         });
 
         LOGGER.info("Relicwrought initialized: mob drops={}, recipe removal={}, class selection={}",

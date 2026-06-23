@@ -2,6 +2,7 @@ package io.github.bysenom.relicwrought.ability;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.bysenom.relicwrought.combat.damage.DamageType;
 import io.github.bysenom.relicwrought.item.io.DefinitionJsonReader;
 import io.github.bysenom.relicwrought.item.model.DefinitionKey;
 
@@ -60,6 +61,18 @@ public class AbilityDefinitionJsonReader implements DefinitionJsonReader<Ability
             throw new IllegalArgumentException("Ability " + id + " has invalid effectType");
         }
 
+        DamageType damageType = DamageType.PHYSICAL;
+        String damageTypeStr = getString(json, "damageType");
+        if (damageTypeStr != null && !damageTypeStr.isBlank()) {
+            try {
+                damageType = DamageType.valueOf(damageTypeStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Ability " + id + " has invalid damageType: " + damageTypeStr);
+            }
+        } else if (effectType == AbilityEffectType.HEAL) {
+            damageType = null;
+        }
+
         double basePower = getDouble(json, "basePower", 1.0);
         double scaling = getDouble(json, "scaling", 1.0);
         int range = getInt(json, "range", 4);
@@ -68,7 +81,7 @@ public class AbilityDefinitionJsonReader implements DefinitionJsonReader<Ability
 
         return new AbilityDefinition(id, translationKey, descriptionKey, icon,
                 allowedClasses, resourceType, resourceCost, cooldownTicks,
-                targetingType, effectType, basePower, scaling, range, radius, dataVersion);
+                targetingType, effectType, damageType, basePower, scaling, range, radius, dataVersion);
     }
 
     private static String getString(JsonObject json, String key) {

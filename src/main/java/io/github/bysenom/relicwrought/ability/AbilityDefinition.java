@@ -1,5 +1,6 @@
 package io.github.bysenom.relicwrought.ability;
 
+import io.github.bysenom.relicwrought.combat.damage.DamageType;
 import io.github.bysenom.relicwrought.item.model.DefinitionKey;
 import io.github.bysenom.relicwrought.item.model.KeyedDefinition;
 
@@ -16,6 +17,7 @@ public record AbilityDefinition(
         int cooldownTicks,
         AbilityTargetingType targetingType,
         AbilityEffectType effectType,
+        DamageType damageType,
         double basePower,
         double scaling,
         int range,

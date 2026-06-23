@@ -9,6 +9,7 @@
   "cooldownTicks": 20,
   "targetingType": "TARGET_ENTITY",
   "effectType": "DAMAGE",
+  "damageType": "PHYSICAL",
   "basePower": 4.0,
   "scaling": 0.8,
   "range": 4,
