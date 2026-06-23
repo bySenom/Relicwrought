@@ -29,7 +29,7 @@ public final class AbilityExecutionService {
         if (!Relicwrought.config().enableAbilities()) {
             return AbilityActivationResult.failure("Abilities are disabled");
         }
-        if (!player.isAlive()) {
+        if (player != null && !player.isAlive()) {
             return AbilityActivationResult.failure("You are dead");
         }
 
@@ -45,8 +45,14 @@ public final class AbilityExecutionService {
         }
         AbilityDefinition ability = optDef.get();
 
-        if (!ability.allowedClasses().contains(profile.classId()) && !ability.allowedClasses().isEmpty()) {
-            return AbilityActivationResult.failure("Wrong class for " + abilityIdStr);
+        if (!ability.allowedClasses().isEmpty()) {
+            String shortClassId = profile.classId();
+            if (shortClassId.contains(":")) {
+                shortClassId = shortClassId.substring(shortClassId.indexOf(':') + 1);
+            }
+            if (!ability.allowedClasses().contains(shortClassId) && !ability.allowedClasses().contains(profile.classId())) {
+                return AbilityActivationResult.failure("Wrong class for " + abilityIdStr);
+            }
         }
 
         if (cooldowns.isOnCooldown(abilityIdStr)) {
@@ -88,7 +94,7 @@ public final class AbilityExecutionService {
             cooldowns.startCooldown(abilityIdStr, ability.cooldownTicks());
         }
 
-        return AbilityActivationResult.success(effectivePower, effectResult.message());
+        return AbilityActivationResult.success(effectivePower, effectResult.message(), profile);
     }
 
     private LivingEntity resolveTarget(ServerPlayer player, AbilityDefinition ability) {
@@ -170,13 +176,13 @@ public final class AbilityExecutionService {
         return new AbilityEffectResult("Healed for " + String.format("%.1f", healAmount));
     }
 
-    public record AbilityActivationResult(boolean success, String message) {
-        public static AbilityActivationResult success(double power, String message) {
-            return new AbilityActivationResult(true, message);
+    public record AbilityActivationResult(boolean success, String message, PlayerArpgProfile updatedProfile) {
+        public static AbilityActivationResult success(double power, String message, PlayerArpgProfile updatedProfile) {
+            return new AbilityActivationResult(true, message, updatedProfile);
         }
 
         public static AbilityActivationResult failure(String message) {
-            return new AbilityActivationResult(false, message);
+            return new AbilityActivationResult(false, message, null);
         }
     }
 

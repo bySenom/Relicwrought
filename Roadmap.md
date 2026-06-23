@@ -1698,3 +1698,27 @@ Ein konsistentes visuelles und spielmechanisches Weapon-Cooldown-System, das den
 - [x] Vanilla-Rezepte können konfigurierbar deaktiviert werden (default: true ab Phase 6.5).
 - [x] `Roadmap.md` ist aktuell.
 - [x] Bekannte Einschränkungen sind dokumentiert.
+
+## Phase 9A � Ability Activation Runtime Validation
+
+### Ziel
+Abilities sind im Singleplayer nutzbar: Hotbar, Aktivierung, Ressourcenkosten, Cooldowns, Schaden/Heilung und Feedback.
+
+### Aufgaben
+- [ ] Ability-Hotbar Slot 1 validieren
+- [ ] Ability-Commands stabilisieren
+- [ ] AbilityUseRequest serverseitig validieren
+- [ ] Resource-Kosten anwenden
+- [ ] Cooldowns anwenden
+- [ ] Cooldown-HUD aktualisieren
+- [ ] Power Strike Schaden testen
+- [ ] Second Wind Heilung testen
+- [ ] Fehlerfeedback implementieren
+- [ ] Tests ergnzen
+- [ ] compileJava
+- [ ] compileClientJava
+- [ ] test
+- [ ] build
+- [ ] runClient
+- [ ] manueller Singleplayer-Test
+

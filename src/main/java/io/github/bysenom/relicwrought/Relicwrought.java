@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import io.github.bysenom.relicwrought.item.model.DefinitionKey;
 
 public final class Relicwrought implements ModInitializer {
     public static final String MOD_ID = "relicwrought";
@@ -80,6 +81,10 @@ public final class Relicwrought implements ModInitializer {
             String classId = profileManager != null ? profileManager.getProfile(player.getUUID()).classId() : null;
             return PlayerAbilityLoadout.defaultsForClass(classId);
         });
+    }
+
+    public static void setLoadout(ServerPlayer player, PlayerAbilityLoadout loadout) {
+        playerLoadouts.put(player.getUUID(), loadout);
     }
     
     public static PlayerAbilityCooldowns getCooldowns(ServerPlayer player) {
@@ -141,8 +146,14 @@ public final class Relicwrought implements ModInitializer {
     }
 
     private static AbilityLoadoutSyncPayload createAbilityLoadoutSyncPayload(ServerPlayer player) {
-        // SCHRITT 1: ISOLATIONS-TEST - ALWAYS SEND EMPTY
-        return createEmptyPayload();
+        PlayerAbilityLoadout loadout = getLoadout(player);
+        List<AbilitySlotSyncEntry> entries = new java.util.ArrayList<>(9);
+        for (int i = 0; i < 9; i++) {
+            Optional<String> abilityId = loadout.getAbilityId(i);
+            Optional<net.minecraft.resources.Identifier> key = abilityId.map(id -> net.minecraft.resources.Identifier.tryParse(id));
+            entries.add(new AbilitySlotSyncEntry(i, key));
+        }
+        return new AbilityLoadoutSyncPayload(entries);
     }
 
     public static boolean openEquipmentScreen(ServerPlayer player) {
@@ -228,8 +239,8 @@ public final class Relicwrought implements ModInitializer {
                 PlayerArpgProfile profile = profileManager != null ? profileManager.getProfile(player.getUUID()) : null;
                 if (profile == null) return;
                 var result = abilityExecutionService.activate(player, payload.slotIndex(), loadout, cooldowns, profile);
-                if (result.success() && config.enableAbilityResourceCosts() && profileManager != null) {
-                    profileManager.saveProfile(player.getUUID(), profile);
+                if (result.success() && config.enableAbilityResourceCosts() && profileManager != null && result.updatedProfile() != null) {
+                    profileManager.saveProfile(player.getUUID(), result.updatedProfile());
                     PlayerHudSyncService.send(player, profileManager);
                 }
                 if (config.enableAbilityCooldowns()) {
@@ -357,11 +368,9 @@ public final class Relicwrought implements ModInitializer {
             net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(srv -> {
                 if (config.enableAbilities() && config.enableAbilityCooldowns()) {
                     for (ServerPlayer player : srv.getPlayerList().getPlayers()) {
-                        if (srv.getTickCount() % 5 == 0) {
-                            PlayerAbilityCooldowns cds = playerCooldowns.get(player.getUUID());
-                            if (cds != null) {
-                                cds.tick();
-                            }
+                        PlayerAbilityCooldowns cds = playerCooldowns.get(player.getUUID());
+                        if (cds != null) {
+                            cds.tick();
                         }
                     }
                 }

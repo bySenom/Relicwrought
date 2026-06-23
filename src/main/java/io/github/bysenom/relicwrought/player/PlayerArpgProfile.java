@@ -21,20 +21,23 @@ public record PlayerArpgProfile(
         long totalXp,
         int unspentAttributePoints,
         Map<CharacterAttribute, Integer> allocatedAttributes,
-        double currentResourceValue
+        double currentResourceValue,
+        double maxResourceValue,
+        String resourceType
 ) {
     public static final int CURRENT_VERSION = 3;
 
     public static PlayerArpgProfile empty() {
         return new PlayerArpgProfile(CURRENT_VERSION, false, "", false, "", 0, 0,
-                CharacterLevel.MIN, 0L, 0L, 0, emptyAttributes(), 0.0);
+                CharacterLevel.MIN, 0L, 0L, 0, emptyAttributes(), 0.0, 100.0, "NONE");
     }
 
     public PlayerArpgProfile withClassSelected(String classId, long timestamp) {
+        String resType = classId.equals("relicwrought:warrior") ? "RAGE" : "NONE";
         return new PlayerArpgProfile(
                 CURRENT_VERSION, true, classId,
                 starterKitGranted, starterKitId, starterKitVersion, timestamp,
-                characterLevel, currentLevelXp, totalXp, unspentAttributePoints, allocatedAttributes, currentResourceValue
+                characterLevel, currentLevelXp, totalXp, unspentAttributePoints, allocatedAttributes, 100.0, 100.0, resType
         );
     }
 
@@ -42,7 +45,7 @@ public record PlayerArpgProfile(
         return new PlayerArpgProfile(
                 CURRENT_VERSION, classSelected, classId,
                 true, kitId, kitVersion, selectionTimestamp,
-                characterLevel, currentLevelXp, totalXp, unspentAttributePoints, allocatedAttributes, currentResourceValue
+                characterLevel, currentLevelXp, totalXp, unspentAttributePoints, allocatedAttributes, currentResourceValue, maxResourceValue, resourceType
         );
     }
 
@@ -51,7 +54,7 @@ public record PlayerArpgProfile(
         return new PlayerArpgProfile(
                 CURRENT_VERSION, classSelected, classId,
                 starterKitGranted, starterKitId, starterKitVersion, selectionTimestamp,
-                level, levelXp, totalXp, unspentPoints, allocated, currentResourceValue
+                level, levelXp, totalXp, unspentPoints, allocated, currentResourceValue, maxResourceValue, resourceType
         );
     }
     
@@ -59,7 +62,15 @@ public record PlayerArpgProfile(
         return new PlayerArpgProfile(
                 CURRENT_VERSION, classSelected, classId,
                 starterKitGranted, starterKitId, starterKitVersion, selectionTimestamp,
-                characterLevel, currentLevelXp, totalXp, unspentAttributePoints, allocatedAttributes, newResourceValue
+                characterLevel, currentLevelXp, totalXp, unspentAttributePoints, allocatedAttributes, Math.min(newResourceValue, maxResourceValue), maxResourceValue, resourceType
+        );
+    }
+
+    public PlayerArpgProfile withMaxResource(double max, String type) {
+        return new PlayerArpgProfile(
+                CURRENT_VERSION, classSelected, classId,
+                starterKitGranted, starterKitId, starterKitVersion, selectionTimestamp,
+                characterLevel, currentLevelXp, totalXp, unspentAttributePoints, allocatedAttributes, Math.min(currentResourceValue, max), max, type
         );
     }
 
@@ -83,7 +94,7 @@ public record PlayerArpgProfile(
                 base.starterKitGranted(), base.starterKitId(), base.starterKitVersion(),
                 base.selectionTimestamp(),
                 prog.level().value(), prog.currentLevelXp(), prog.totalXp(),
-                prog.unspentAttributePoints(), attrs, base.currentResourceValue()
+                prog.unspentAttributePoints(), attrs, base.currentResourceValue(), base.maxResourceValue(), base.resourceType()
         );
     }
 
@@ -101,7 +112,7 @@ public record PlayerArpgProfile(
                 v1.classSelected(), v1.classId(),
                 v1.starterKitGranted(), v1.starterKitId(), v1.starterKitVersion(),
                 v1.selectionTimestamp(),
-                CharacterLevel.MIN, 0L, 0L, 0, emptyAttributes(), 0.0
+                CharacterLevel.MIN, 0L, 0L, 0, emptyAttributes(), 0.0, 100.0, "NONE"
         );
     }
 
@@ -112,7 +123,7 @@ public record PlayerArpgProfile(
                 v2.starterKitGranted(), v2.starterKitId(), v2.starterKitVersion(),
                 v2.selectionTimestamp(),
                 v2.characterLevel(), v2.currentLevelXp(), v2.totalXp(), v2.unspentAttributePoints(),
-                v2.allocatedAttributes(), 0.0
+                v2.allocatedAttributes(), v2.currentResourceValue(), 100.0, "NONE" // Added defaults
         );
     }
 }

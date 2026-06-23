@@ -27,6 +27,13 @@ public final class ClassSelectionNetworking {
                 var result = selectionManager.selectClass(player, payload.classId());
 
                 if (result.success()) {
+                    // Initialize ability loadout for this class and sync to client
+                    var profile = selectionManager.getProfile(player);
+                    var loadout = io.github.bysenom.relicwrought.ability.PlayerAbilityLoadout.defaultsForClass(profile.classId());
+                    // Force overwrite any cached empty loadout
+                    Relicwrought.setLoadout(player, loadout);
+                    Relicwrought.syncAbilityLoadout(player);
+
                     var response = new ClassSelectionResponse(true,
                             "Class selected: " + payload.classId(), payload.classId());
                     ServerPlayNetworking.send(player, response);

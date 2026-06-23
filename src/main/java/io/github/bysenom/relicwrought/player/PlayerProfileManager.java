@@ -95,7 +95,7 @@ public final class PlayerProfileManager {
                     dataVersion, classSelected, classId, starterKitGranted,
                     starterKitId, starterKitVersion, selectionTimestamp,
                     io.github.bysenom.relicwrought.progression.CharacterLevel.MIN,
-                    0L, 0L, 0, PlayerArpgProfile.emptyAttributes(), 0.0
+                    0L, 0L, 0, PlayerArpgProfile.emptyAttributes(), 0.0, 100.0, "NONE"
             );
             return PlayerArpgProfile.legacyV2ToV3(PlayerArpgProfile.legacyV1ToV2(v1));
         }
@@ -129,19 +129,21 @@ public final class PlayerProfileManager {
             PlayerArpgProfile v2 = new PlayerArpgProfile(
                     dataVersion, classSelected, classId, starterKitGranted,
                     starterKitId, starterKitVersion, selectionTimestamp,
-                    characterLevel, currentLevelXp, totalXp, unspentAttributePoints, allocated, 0.0
+                    characterLevel, currentLevelXp, totalXp, unspentAttributePoints, allocated, 0.0, 100.0, "NONE"
             );
             return PlayerArpgProfile.legacyV2ToV3(v2);
         }
         
         double currentResourceValue = getDouble(data, "currentResourceValue", 0.0);
+        double maxResourceValue = getDouble(data, "maxResourceValue", 100.0);
+        String resourceType = getStr(data, "resourceType", "NONE");
 
         return new PlayerArpgProfile(
                 PlayerArpgProfile.CURRENT_VERSION,
                 classSelected, classId, starterKitGranted,
                 starterKitId, starterKitVersion, selectionTimestamp,
                 characterLevel, currentLevelXp, totalXp,
-                unspentAttributePoints, allocated, currentResourceValue
+                unspentAttributePoints, allocated, currentResourceValue, maxResourceValue, resourceType
         );
     }
 
@@ -172,6 +174,8 @@ public final class PlayerProfileManager {
                 }
                 data.put("allocatedAttributes", attrs);
                 data.put("currentResourceValue", p.currentResourceValue());
+                data.put("maxResourceValue", p.maxResourceValue());
+                data.put("resourceType", p.resourceType());
 
                 raw.put(entry.getKey().toString(), data);
             }

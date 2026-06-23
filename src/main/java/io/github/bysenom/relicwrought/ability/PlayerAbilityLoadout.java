@@ -51,16 +51,19 @@ public final class PlayerAbilityLoadout {
 
     public static PlayerAbilityLoadout defaultsForClass(String classId) {
         PlayerAbilityLoadout loadout = new PlayerAbilityLoadout();
-        if ("warrior".equals(classId)) {
+        if (classId == null) return loadout;
+        // Strip namespace prefix if present (e.g. "relicwrought:warrior" -> "warrior")
+        String shortId = classId.contains(":") ? classId.substring(classId.indexOf(':') + 1) : classId;
+        if ("warrior".equals(shortId)) {
             loadout.abilityIds[0] = "relicwrought:power_strike";
             loadout.abilityIds[8] = "relicwrought:second_wind";
-        } else if ("arcanist".equals(classId)) {
+        } else if ("arcanist".equals(shortId)) {
             loadout.abilityIds[0] = "relicwrought:fire_bolt";
             loadout.abilityIds[8] = "relicwrought:second_wind";
-        } else if ("rogue".equals(classId)) {
+        } else if ("rogue".equals(shortId)) {
             loadout.abilityIds[0] = "relicwrought:quick_jab";
             loadout.abilityIds[8] = "relicwrought:second_wind";
-        } else if ("ranger".equals(classId)) {
+        } else if ("ranger".equals(shortId)) {
             loadout.abilityIds[8] = "relicwrought:second_wind";
         }
         return loadout;
